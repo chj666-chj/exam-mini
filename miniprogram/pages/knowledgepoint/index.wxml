@@ -1,0 +1,88 @@
+<view class="kp-page">
+  <view class="weak-banner" wx:if="{{weakKpMode}}">
+    <text class="weak-banner-text">薄弱知识点模式 - 红色标记为本次测评薄弱项，建议优先练习</text>
+    <view class="weak-banner-close" bindtap="clearWeakMode">退出</view>
+  </view>
+
+  <view class="kp-header">
+    <view class="exam-picker" bindtap="examPickerTap">
+      <picker mode="selector" range="{{examList}}" range-key="name" value="{{examPickerIndex}}" bindchange="onExamChange">
+        <view class="picker-value">
+          <text class="picker-label">考试科目</text>
+          <text class="picker-text">{{selectedExamName || '请选择'}}</text>
+          <text class="picker-arrow">></text>
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="kp-stats">
+    <view class="stat-item">
+      <text class="stat-num">{{stats.total}}</text>
+      <text class="stat-label">总知识点</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-num stat-practiced">{{stats.practiced}}</text>
+      <text class="stat-label">已练习</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-num stat-weak">{{stats.weak}}</text>
+      <text class="stat-label">薄弱</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-num stat-new">{{stats.unpracticed}}</text>
+      <text class="stat-label">未练习</text>
+    </view>
+  </view>
+
+  <view class="kp-tree" wx:if="{{!loading && treeData.length > 0}}">
+    <block wx:for="{{treeData}}" wx:key="_id" wx:for-item="kp1">
+      <view class="kp-node kp-level1" bindtap="toggleExpand" data-kpid="{{kp1._id}}">
+        <view class="kp-expand-icon">{{expandedKeys[kp1._id] ? 'v' : '>'}}</view>
+        <text class="kp-name">{{kp1.name}}</text>
+        <text class="kp-count">{{kp1.questionCount}}题</text>
+        <text class="kp-mastery-tag" style="color:{{kp1.masteryColor}}">{{kp1.masteryLabel}}</text>
+      </view>
+
+      <view class="kp-children" wx:if="{{expandedKeys[kp1._id]}}">
+        <block wx:for="{{kp1.children}}" wx:key="_id" wx:for-item="kp2">
+          <view class="kp-node kp-level2 {{kp2.isWeakFromAssessment ? 'kp-weak-highlight' : ''}}" bindtap="onKpTap" data-kpid="{{kp2._id}}" data-kpname="{{kp2.name}}" data-qcount="{{kp2.questionCount}}" data-subjectid="{{kp2.subjectId}}" data-masterylabel="{{kp2.masteryLabel}}" data-isweak="{{kp2.isWeakFromAssessment}}">
+            <view class="kp-dot" style="background:{{kp2.masteryColor}}"></view>
+            <text class="kp-name">{{kp2.name}}</text>
+            <text class="kp-count">{{kp2.questionCount}}题</text>
+            <text class="kp-mastery-tag" style="color:{{kp2.masteryColor}}">{{kp2.masteryLabel}}</text>
+            <text wx:if="{{kp2.isWeakFromAssessment}}" class="kp-weak-badge">薄弱</text>
+          </view>
+        </block>
+        <view class="kp-empty-children" wx:if="{{kp1.children.length === 0}}">
+          <text>暂无子知识点</text>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="kp-loading" wx:if="{{loading}}">
+    <text>加载知识点中...</text>
+  </view>
+
+  <view class="kp-empty" wx:if="{{!loading && treeData.length === 0}}">
+    <text>暂无知识点数据</text>
+  </view>
+
+  <view class="kp-detail-mask" wx:if="{{detailVisible}}" bindtap="closeDetail">
+    <view class="kp-detail-card" catchtap="noop">
+      <view class="detail-title">{{detailKp.name}}</view>
+      <view class="detail-info">
+        <text class="detail-item">关联题目: {{detailKp.questionCount}} 题</text>
+        <text class="detail-item">掌握度: {{detailKp.masteryLabel}}</text>
+        <text wx:if="{{detailKp.masteryDetail}}" class="detail-item detail-mastery">{{detailKp.masteryDetail}}</text>
+      </view>
+      <view class="detail-actions">
+        <view class="detail-btn btn-practice" bindtap="practiceKp">答题练习</view>
+        <view class="detail-btn btn-memorize" bindtap="memorizeKp">背题浏览</view>
+        <view class="detail-btn btn-wrong" bindtap="wrongKp">错题专项</view>
+      </view>
+      <view class="detail-close" bindtap="closeDetail">关闭</view>
+    </view>
+  </view>
+</view>

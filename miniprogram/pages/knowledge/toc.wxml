@@ -1,0 +1,95 @@
+<view class="page-toc">
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="toc-loading">
+    <text>加载中...</text>
+  </view>
+
+  <block wx:if="{{!loading && doc}}">
+    <!-- 文档信息头 -->
+    <view class="toc-header {{doc.typeColor}}">
+      <view class="toc-header-top">
+        <text class="toc-header-icon">{{doc.typeIcon}}</text>
+        <view class="toc-header-type-badge">{{doc.typeLabel}}</view>
+        <text wx:if="{{doc.category}}" class="toc-header-category">{{doc.category}}</text>
+      </view>
+      <view class="toc-header-title">{{doc.title}}</view>
+      <view class="toc-header-summary" wx:if="{{doc.summary}}">{{doc.summary}}</view>
+      <view class="toc-header-meta">
+        <text wx:if="{{totalSections > 0}}" class="toc-meta-item">📑 {{totalSections}}节</text>
+        <text wx:if="{{doc.pages > 0}}" class="toc-meta-item">{{doc.pages}}页</text>
+        <text class="toc-meta-item">阅读 {{doc.views || 0}}</text>
+      </view>
+    </view>
+
+    <!-- 目录标题栏 -->
+    <view class="toc-bar">
+      <text class="toc-bar-title">📑 目录</text>
+      <text class="toc-bar-hint">点击章节进入阅读</text>
+    </view>
+
+    <!-- 目录树 -->
+    <view class="toc-tree" wx:if="{{tocTree.length > 0}}">
+      <block wx:for="{{tocTree}}" wx:key="title" wx:for-index="l1Idx">
+        <!-- Level 1 -->
+        <view class="toc-l1" data-idx="{{l1Idx}}" bindtap="toggleNode">
+          <text class="toc-l1-arrow">{{item.expanded ? '▼' : '▶'}}</text>
+          <text class="toc-l1-title">{{item.title}}</text>
+          <text wx:if="{{item.children.length > 0}}" class="toc-l1-badge">{{item.children.length}}</text>
+          <text wx:if="{{item.page > 0}}" class="toc-l1-page">P{{item.page}}</text>
+        </view>
+
+        <!-- Level 2 (children of Level 1) -->
+        <block wx:if="{{item.expanded}}">
+          <block wx:for="{{item.children}}" wx:key="title" wx:for-item="l2" wx:for-index="l2Idx">
+            <view
+              class="toc-l2 {{l2.children.length > 0 ? 'has-children' : ''}}"
+              data-section="{{l2.title}}"
+              bindtap="{{l2.children.length > 0 ? '' : 'openSection'}}"
+            >
+              <text class="toc-l2-dot">○</text>
+              <text class="toc-l2-title">{{l2.title}}</text>
+              <text wx:if="{{l2.page > 0}}" class="toc-l2-page">P{{l2.page}}</text>
+              <text wx:if="{{l2.children.length > 0}}" class="toc-l2-arrow">›</text>
+            </view>
+
+            <!-- Level 3 (children of Level 2) -->
+            <view
+              wx:for="{{l2.children}}"
+              wx:key="title"
+              wx:for-item="l3"
+              class="toc-l3"
+              data-section="{{l3.title}}"
+              bindtap="openSection"
+            >
+              <text class="toc-l3-dot">·</text>
+              <text class="toc-l3-title">{{l3.title}}</text>
+              <text wx:if="{{l3.page > 0}}" class="toc-l3-page">P{{l3.page}}</text>
+            </view>
+          </block>
+
+          <!-- If Level 1 has no children, show direct read entry -->
+          <view wx:if="{{item.children.length === 0}}" class="toc-l1-direct" data-section="{{item.title}}" bindtap="openSection">
+            <text class="toc-l1-direct-text">📖 阅读此章节</text>
+          </view>
+        </block>
+      </block>
+    </view>
+
+    <!-- 空目录 -->
+    <view wx:if="{{tocTree.length === 0}}" class="toc-empty">
+      <text class="toc-empty-icon">📋</text>
+      <text class="toc-empty-text">该文档暂无目录结构</text>
+    </view>
+
+    <!-- 底部操作 -->
+    <view class="toc-bottom">
+      <view class="toc-bottom-back" bindtap="goBack">
+        <text>← 返回列表</text>
+      </view>
+      <view class="toc-bottom-read" bindtap="readAll">
+        <text class="toc-bottom-read-icon">📖</text>
+        <text>阅读全部</text>
+      </view>
+    </view>
+  </block>
+</view>

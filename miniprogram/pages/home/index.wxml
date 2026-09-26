@@ -1,0 +1,89 @@
+<view class="page-home">
+  <!-- 科目选择栏目 -->
+  <view class="subject-select-section">
+    <view class="section-header">
+      <view class="section-title-bar"></view>
+      <text class="section-title-text">科目选择</text>
+    </view>
+
+    <!-- 考试(科目)选择器 -->
+    <view class="exam-picker-row" wx:if="{{examList.length > 0}}">
+      <picker class="exam-picker" bindchange="onExamChange" value="{{subjectPickerIndex}}" range="{{examList}}" range-key="name">
+        <view class="picker-content">
+          <view class="picker-left">
+            <view class="picker-icon-box">
+              <text class="picker-icon-text">考</text>
+            </view>
+            <view class="picker-info">
+              <text class="picker-name">{{selectedExamName}}</text>
+              <text class="picker-hint">点击切换科目</text>
+            </view>
+          </view>
+          <view class="picker-arrow">切换 ▾</view>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 无科目数据提示 -->
+    <view class="no-data-hint" wx:if="{{examList.length === 0}}">
+      <text>暂无考试数据，请等待管理员添加</text>
+    </view>
+  </view>
+
+  <!-- 功能宫格 -->
+  <view class="menu-panel">
+    <view class="menu-grid">
+      <!-- 左列 -->
+      <view class="menu-col">
+        <view class="menu-item" bindtap="goSpecial">
+          <image class="menu-icon" src="/icons/menu-special.png" mode="aspectFit" />
+          <text class="menu-text">专项刷题</text>
+        </view>
+        <view class="menu-item" bindtap="goType">
+          <image class="menu-icon" src="/icons/menu-type.png" mode="aspectFit" />
+          <text class="menu-text">题型刷题</text>
+        </view>
+        <view class="menu-item" bindtap="goShuffle">
+          <image class="menu-icon" src="/icons/menu-shuffle.png" mode="aspectFit" />
+          <text class="menu-text">乱序刷题</text>
+        </view>
+        <view class="menu-item" bindtap="goFav">
+          <image class="menu-icon" src="/icons/menu-fav.png" mode="aspectFit" />
+          <text class="menu-text">我的收藏</text>
+        </view>
+      </view>
+
+      <!-- 中列：两个大圆钮 -->
+      <view class="menu-center">
+        <view class="circle-btn circle-blue" bindtap="goOrder">
+          <text>顺序练习</text>
+        </view>
+        <view class="circle-btn circle-green" bindtap="goExam">
+          <text>模拟考试</text>
+        </view>
+      </view>
+
+      <!-- 右列 -->
+      <view class="menu-col">
+        <view class="menu-item" bindtap="goWrong">
+          <image class="menu-icon" src="/icons/menu-wrong.png" mode="aspectFit" />
+          <text class="menu-text">我的错题</text>
+        </view>
+        <view class="menu-item" bindtap="goUndone">
+          <image class="menu-icon" src="/icons/menu-undone.png" mode="aspectFit" />
+          <text class="menu-text">未作习题</text>
+        </view>
+        <view class="menu-item" bindtap="goKnowledge">
+          <image class="menu-icon" src="/icons/menu-knowledge.png" mode="aspectFit" />
+          <text class="menu-text">刷知识点</text>
+        </view>
+        <view class="menu-item" bindtap="goSelfTest">
+          <image class="menu-icon" src="/icons/menu-selftest.png" mode="aspectFit" />
+          <text class="menu-text">自我测评</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+
+</view>

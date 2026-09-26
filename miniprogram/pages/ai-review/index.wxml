@@ -1,0 +1,85 @@
+<view class="page-ai-review">
+  <!-- 顶部统计卡片 -->
+  <view class="stat-card">
+    <view class="stat-header">
+      <view class="stat-date">今日推荐</view>
+      <view class="stat-date-text">{{todayDate}}</view>
+    </view>
+    <view class="stat-body">
+      <view class="stat-item">
+        <view class="stat-num">{{total}}</view>
+        <view class="stat-label">推荐题目</view>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <view class="stat-num">{{reviewed}}</view>
+        <view class="stat-label">已复习</view>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <view class="stat-num">{{progressPercent}}%</view>
+        <view class="stat-label">完成进度</view>
+      </view>
+    </view>
+    <view class="stat-progress-bar" wx:if="{{total > 0}}">
+      <view class="stat-progress-fill" style="width: {{progressPercent}}%"></view>
+    </view>
+  </view>
+
+  <!-- 生成按钮 -->
+  <view class="gen-btn-area">
+    <view
+      class="gen-btn {{generating ? 'gen-btn-disabled' : ''}}"
+      bindtap="generatePlan"
+    >
+      <text wx:if="{{!generating}}">⚡ 生成今日推荐</text>
+      <text wx:if="{{generating}}">生成中... {{genPercent}}%</text>
+    </view>
+    <view wx:if="{{generating}}" class="gen-progress-bar">
+      <view class="gen-progress-fill" style="width: {{genPercent}}%"></view>
+    </view>
+    <view wx:if="{{generating}}" class="gen-status-text">{{genStatusText}}</view>
+  </view>
+
+  <!-- 复习清单 -->
+  <view class="review-section" wx:if="{{items.length > 0}}">
+    <view class="review-section-title">复习清单</view>
+    <view
+      wx:for="{{items}}"
+      wx:key="index"
+      class="review-item {{item.reviewed ? 'review-item-done' : ''}}"
+      data-item="{{item}}"
+      bindtap="onTapItem"
+    >
+      <!-- 序号 -->
+      <view class="review-item-index">{{index + 1}}</view>
+
+      <!-- 内容区 -->
+      <view class="review-item-content">
+        <view class="review-item-summary">{{item.summaryDisplay}}</view>
+        <view class="review-item-meta">
+          <view class="review-tag review-tag-{{item.reasonTagType}}">{{item.reason}}</view>
+          <view class="review-count">{{item.reviewCountText}}</view>
+        </view>
+      </view>
+
+      <!-- 状态 -->
+      <view class="review-item-status">
+        <view wx:if="{{item.reviewed}}" class="review-done-icon">✓</view>
+        <view wx:else class="review-arrow">›</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{!loading && items.length === 0 && !generating}}" class="empty-state">
+    <view class="empty-icon">📚</view>
+    <view class="empty-text">今日暂无推荐复习题目</view>
+    <view class="empty-hint">点击上方「生成今日推荐」按钮，AI 将根据你的学习情况智能推荐复习内容</view>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-text">加载中...</view>
+  </view>
+</view>

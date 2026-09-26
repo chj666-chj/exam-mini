@@ -1,0 +1,330 @@
+<view class="exam">
+  <view wx:if="{{loading}}" class="state-box">
+    <view class="state-text">加载中...</view>
+  </view>
+
+  <view wx:if="{{error}}" class="state-box">
+    <view class="state-text error">{{error}}</view>
+  </view>
+
+  <view wx:if="{{!loading && !error}}">
+    <!-- 倒计时（模拟考试 + 自我测评） -->
+    <view wx:if="{{(examMode || assessmentMode) && timeLimit > 0}}" class="exam-timer {{remainingSeconds < 300 ? 'timer-warning' : ''}}">
+      <text class="timer-icon-text">剩余</text>
+      <text class="timer-text">{{timeDisplay}}</text>
+    </view>
+
+    <!-- 功能5: 答题进度提示 -->
+    <view class="progress-bar">
+      <view class="progress-info">
+        <text class="progress-label">{{assessmentMode ? '自我测评' : (examMode ? '模拟考试' : (mode === 'memorize' ? '背题模式' : '答题模式'))}}</text>
+        <text class="progress-count">{{answeredCount}}/{{total}}题 · {{percent}}%</text>
+      </view>
+      <!-- 自定义进度条：CSS transition 实现平滑增量动画，避免内置 progress active 每次从0重新渲染 -->
+      <view class="progress-track">
+        <view class="progress-fill" style="width: {{percent}}%;"></view>
+      </view>
+    </view>
+
+    <!-- 题目卡片 -->
+    <view class="question-card {{fontSizeClass}}">
+      <!-- 功能7: 题目标签 -->
+      <view class="question-tags">
+        <view class="qtag qtag-type">{{qtypeLabel}}</view>
+        <view class="qtag qtag-diff-{{question.difficulty || 1}}">{{difficultyLabel}}</view>
+        <view wx:if="{{question.image}}" class="qtag qtag-img">配图题</view>
+        <view class="qtag-spacer"></view>
+        <!-- 功能2: 收藏按钮 -->
+        <view class="fav-btn {{isFavorited ? 'fav-on' : ''}}" bindtap="toggleFavorite">
+          <text>{{isFavorited ? '已收藏' : '收藏'}}</text>
+        </view>
+      </view>
+
+      <view class="question-title">{{question.title}}</view>
+
+      <!-- 题目配图区域 -->
+      <view wx:if="{{question.image}}" class="question-image-box">
+        <view class="image-placeholder">
+          <text class="image-label">{{question.imageType || 'chart'}}</text>
+          <text class="image-desc">{{question.imageDesc}}</text>
+        </view>
+      </view>
+
+      <!-- 选项列表 -->
+      <view class="question-options">
+        <view
+          wx:for="{{options}}"
+          wx:key="code"
+          class="option-item {{item.selected ? 'selected' : ''}} {{(showAnswer || instantResult) && item.isCorrect ? 'correct' : ''}} {{(showAnswer || instantResult) && item.selected && !item.isCorrect ? 'wrong' : ''}}"
+          data-code="{{item.code}}"
+          bindtap="selectOption"
+        >
+          <view class="option-marker">
+            <view class="marker-circle {{item.selected ? 'marker-filled' : ''}} {{(showAnswer || instantResult) && item.isCorrect ? 'marker-correct' : ''}}"></view>
+          </view>
+          <view class="option-content">{{item.code}}. {{item.content}}</view>
+          <view wx:if="{{(showAnswer || instantResult) && item.isCorrect}}" class="answer-tag">正确答案</view>
+        </view>
+      </view>
+
+      <!-- 答题模式即时反馈 -->
+      <view wx:if="{{instantResult && mode === 'answer'}}" class="instant-result {{instantCorrect ? 'result-correct' : 'result-wrong'}}">
+        <text>{{instantCorrect ? '回答正确' : '回答错误'}}</text>
+      </view>
+
+      <view wx:if="{{mode === 'memorize'}}" class="memorize-hint">
+        <text>背题模式：正确答案已标注，点击下一题继续浏览</text>
+      </view>
+
+      <!-- 功能1: 解析展开/收起 -->
+      <view wx:if="{{question.explanation || question.comments || kpTags.length > 0}}" class="explanation-section">
+        <view class="explanation-toggle" bindtap="toggleExplanation">
+          <text class="explanation-toggle-text">{{showExplanation ? '收起解析' : '查看解析'}}</text>
+          <text class="explanation-toggle-arrow">{{showExplanation ? '▾' : '▸'}}</text>
+        </view>
+        <view wx:if="{{showExplanation}}" class="explanation-content">
+          <!-- 考察章节和知识点标签 -->
+          <view wx:if="{{kpTags.length > 0}}" class="explanation-tags">
+            <text class="exp-tag-label">考点</text>
+            <view class="exp-tag" wx:for="{{kpTags}}" wx:key="*this">{{item}}</view>
+          </view>
+          <!-- 解析文本 -->
+          <view wx:if="{{question.explanation || question.comments}}" class="explanation-text">{{question.explanation || question.comments}}</view>
+        </view>
+      </view>
+
+      <!-- AI 题目深度解析（VIP 专用）-->
+      <view class="ai-analysis-entry">
+        <view class="ai-analysis-btn {{isVip ? 'ai-btn-vip' : 'ai-btn-locked'}}" bindtap="tapAiAnalysis">
+          <text class="ai-btn-icon">AI</text>
+          <text class="ai-btn-text">{{isVip ? (showAiAnalysis ? '收起AI解析' : 'AI深度解析') : 'AI深度解析 (VIP)'}}</text>
+          <text wx:if="{{!isVip}}" class="ai-btn-lock-icon">🔒</text>
+        </view>
+
+        <!-- AI 解析结果面板 -->
+        <view wx:if="{{showAiAnalysis}}" class="ai-analysis-panel">
+          <!-- 加载中 -->
+          <view wx:if="{{aiAnalysisLoading}}" class="ai-state-box">
+            <view class="ai-loading-spinner"></view>
+            <text class="ai-state-text">AI 正在解析中，请稍候...</text>
+          </view>
+
+          <!-- 解析失败 -->
+          <view wx:elif="{{aiAnalysisError}}" class="ai-state-box ai-state-error">
+            <text class="ai-state-text ai-text-error">{{aiAnalysisError}}</text>
+            <view class="ai-retry-btn" bindtap="retryAiAnalysis">重试</view>
+          </view>
+
+          <!-- 空结果 -->
+          <view wx:elif="{{!aiAnalysisData}}" class="ai-state-box">
+            <text class="ai-state-text">暂无 AI 解析结果</text>
+            <view class="ai-retry-btn" bindtap="retryAiAnalysis">重新解析</view>
+          </view>
+
+          <!-- 解析结果展示 -->
+          <view wx:else class="ai-analysis-content">
+            <!-- 缓存标记 + 元信息 -->
+            <view class="ai-meta-row">
+              <view wx:if="{{aiAnalysisCached}}" class="ai-cached-tag">已缓存</view>
+              <view wx:if="{{aiAnalysisDisplay.qtypeLabel}}" class="ai-meta-tag">{{aiAnalysisDisplay.qtypeLabel}}</view>
+              <view wx:if="{{aiAnalysisDisplay.difficultyLabel}}" class="ai-meta-tag">{{aiAnalysisDisplay.difficultyLabel}}</view>
+            </view>
+
+            <!-- 知识点 -->
+            <view wx:if="{{aiAnalysisDisplay.knowledgePoints.length > 0}}" class="ai-section">
+              <text class="ai-section-title">知识点</text>
+              <view class="ai-tag-list">
+                <view class="ai-kp-tag" wx:for="{{aiAnalysisDisplay.knowledgePoints}}" wx:key="*this">{{item}}</view>
+              </view>
+            </view>
+
+            <!-- 答案解析（Markdown rich-text 渲染）-->
+            <view wx:if="{{aiAnalysisNodes.length > 0}}" class="ai-section">
+              <text class="ai-section-title">答案解析</text>
+              <scroll-view scroll-y class="ai-md-scroll">
+                <rich-text class="ai-md-content" nodes="{{aiAnalysisNodes}}"></rich-text>
+              </scroll-view>
+            </view>
+
+            <!-- 核心概念 -->
+            <view wx:if="{{aiAnalysisDisplay.keyConcepts.length > 0}}" class="ai-section">
+              <text class="ai-section-title">核心概念</text>
+              <view class="ai-tag-list">
+                <view class="ai-concept-tag" wx:for="{{aiAnalysisDisplay.keyConcepts}}" wx:key="*this">{{item}}</view>
+              </view>
+            </view>
+
+            <!-- 常见错误 -->
+            <view wx:if="{{aiAnalysisDisplay.commonMistakes.length > 0}}" class="ai-section">
+              <text class="ai-section-title">常见错误</text>
+              <view class="ai-mistake-list">
+                <view class="ai-mistake-item" wx:for="{{aiAnalysisDisplay.commonMistakes}}" wx:key="*this">
+                  <text class="ai-mistake-bullet">·</text>
+                  <text class="ai-mistake-text">{{item}}</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- 推荐标签 -->
+            <view wx:if="{{aiAnalysisDisplay.suggestedTags.length > 0}}" class="ai-section">
+              <text class="ai-section-title">推荐标签</text>
+              <view class="ai-tag-list">
+                <view class="ai-suggest-tag" wx:for="{{aiAnalysisDisplay.suggestedTags}}" wx:key="*this">{{item}}</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 回答结果信息块 -->
+      <view wx:if="{{(showAnswer || instantResult) && (myAnswerText || correctAnswerText)}}" class="answer-result-block">
+        <view class="result-title">回答结果</view>
+        <view class="result-row">
+          <text class="result-label">我的答案</text>
+          <text class="result-value {{resultClass}}">{{myAnswerText || '未作答'}}</text>
+        </view>
+        <view class="result-row">
+          <text class="result-label">正确答案</text>
+          <text class="result-value result-correct-text">{{correctAnswerText}}</text>
+        </view>
+        <view class="result-row">
+          <text class="result-label">判定</text>
+          <view class="result-badge {{resultClass}}">{{resultLabel}}</view>
+        </view>
+        <view class="result-row">
+          <text class="result-label">全站作答</text>
+          <text class="result-value">{{questionStats.totalAttempts}}次</text>
+        </view>
+        <view class="result-row">
+          <text class="result-label">全站正确率</text>
+          <text class="result-value">{{questionStats.correctRate}}%</text>
+        </view>
+      </view>
+
+      <!-- 功能6: 题目反馈（由底部栏触发） -->
+      <view wx:if="{{showFeedback}}" class="feedback-section">
+        <view class="feedback-form">
+          <textarea
+            class="feedback-input"
+            placeholder="如发现题目有误或有建议，请在此描述..."
+            maxlength="500"
+            value="{{feedbackText}}"
+            bindinput="onFeedbackInput"
+          />
+          <view class="feedback-submit" bindtap="submitFeedback">
+            <text>提交反馈</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部操作栏（5按钮） -->
+    <view class="nav-bar">
+      <view class="nav-btn nav-secondary {{currentIndex === 0 ? 'disabled' : ''}}" bindtap="goPrev">上一页</view>
+      <view class="nav-btn nav-secondary {{showExplanation ? 'nav-active' : ''}}" bindtap="toggleExplanation">解析</view>
+      <view class="nav-btn nav-secondary" bindtap="toggleAnswerCard">答题卡</view>
+      <view class="nav-btn nav-secondary {{showFeedback ? 'nav-active' : ''}}" bindtap="toggleFeedback">反馈</view>
+      <view class="nav-btn nav-primary {{!answered && mode !== 'memorize' && !unifiedMode ? 'disabled' : ''}}" bindtap="goNext">{{btnText}}</view>
+    </view>
+
+    <!-- 功能3: 答题卡弹层 -->
+    <view wx:if="{{showCard}}" class="card-mask" bindtap="closeAnswerCard">
+      <view class="card-panel" catchtap="noop">
+        <view class="card-header">
+          <text class="card-title">答题卡</text>
+          <view class="card-close" bindtap="closeAnswerCard">×</view>
+        </view>
+        <view class="card-stats">
+          <view class="card-stat-item" wx:for="{{cardLegend}}" wx:key="type">
+            <view class="card-stat-dot dot-{{item.type}}"></view>
+            <text>{{item.label}} {{item.count}}</text>
+          </view>
+        </view>
+        <view class="card-grid">
+          <view
+            wx:for="{{answerCard}}"
+            wx:key="index"
+            class="card-cell cell-{{item.status}} {{item.isCurrent ? 'cell-current' : ''}}"
+            data-index="{{item.index}}"
+            bindtap="cardJump"
+          >
+            <text>{{item.index + 1}}</text>
+            <view wx:if="{{item.mark}}" class="cell-corner"></view>
+            <text wx:if="{{item.mark}}" class="cell-mark">{{item.mark}}</text>
+          </view>
+        </view>
+        <!-- AI 答题分析总结入口 -->
+        <view class="card-ai-summary-btn {{isVip ? '' : 'card-ai-locked'}}" bindtap="tapExamSummary">
+          <text class="card-ai-icon">AI</text>
+          <text>{{isVip ? 'AI答题分析总结' : 'AI答题分析总结 (VIP)'}}</text>
+          <text wx:if="{{!isVip}}" class="card-ai-lock">🔒</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI 答题分析总结弹层 -->
+    <view wx:if="{{showExamSummary}}" class="ai-summary-mask" bindtap="closeExamSummary">
+      <view class="ai-summary-panel" catchtap="noop">
+        <view class="ai-summary-header">
+          <text class="ai-summary-title">AI 答题分析总结</text>
+          <view class="ai-summary-close" bindtap="closeExamSummary">×</view>
+        </view>
+        <scroll-view scroll-y class="ai-summary-body">
+          <!-- 加载中 -->
+          <view wx:if="{{examSummaryLoading}}" class="ai-state-box">
+            <view class="ai-loading-spinner"></view>
+            <text class="ai-state-text">AI 正在分析您的作答情况...</text>
+          </view>
+          <!-- 分析失败 -->
+          <view wx:elif="{{examSummaryError}}" class="ai-state-box ai-state-error">
+            <text class="ai-state-text ai-text-error">{{examSummaryError}}</text>
+            <view class="ai-retry-btn" bindtap="retryExamSummary">重试</view>
+          </view>
+          <!-- 空结果 -->
+          <view wx:elif="{{!examSummaryData}}" class="ai-state-box">
+            <text class="ai-state-text">暂无分析结果</text>
+            <view class="ai-retry-btn" bindtap="retryExamSummary">重新分析</view>
+          </view>
+          <!-- 分析结果 -->
+          <view wx:else class="ai-summary-content">
+            <view class="ai-summary-overall">
+              <text>{{examSummaryData.overall}}</text>
+            </view>
+            <view class="ai-summary-score-bar">
+              <view class="ai-score-item">
+                <text class="ai-score-num ai-score-correct">{{examSummaryData.correctCount || 0}}</text>
+                <text class="ai-score-label">答对</text>
+              </view>
+              <view class="ai-score-item">
+                <text class="ai-score-num ai-score-wrong">{{examSummaryData.wrongCount || 0}}</text>
+                <text class="ai-score-label">答错</text>
+              </view>
+              <view class="ai-score-item">
+                <text class="ai-score-num ai-score-skip">{{examSummaryData.unansweredCount || 0}}</text>
+                <text class="ai-score-label">未答</text>
+              </view>
+              <view class="ai-score-item">
+                <text class="ai-score-num ai-score-total">{{examSummaryData.score || 0}}</text>
+                <text class="ai-score-label">得分</text>
+              </view>
+            </view>
+            <rich-text wx:if="{{examSummaryNodes.length > 0}}" class="ai-summary-md" nodes="{{examSummaryNodes}}"></rich-text>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+
+    <!-- VIP 升级引导弹层 -->
+    <view wx:if="{{showVipUpgrade}}" class="vip-upgrade-mask" bindtap="closeVipUpgrade">
+      <view class="vip-upgrade-panel" catchtap="noop">
+        <view class="vip-upgrade-close" bindtap="closeVipUpgrade">×</view>
+        <view class="vip-upgrade-icon">VIP</view>
+        <view class="vip-upgrade-title">升级 VIP 解锁 AI 智能解析</view>
+        <view class="vip-upgrade-desc">
+          VIP 专属功能：\n· AI 题目深度解析（知识点 / 难度分析 / 常见错误）\n· AI 答题分析总结（整份作答总结报告）\n· 缓存优先，秒级返回已解析题目
+        </view>
+        <view class="vip-upgrade-action" bindtap="closeVipUpgrade">知道了</view>
+      </view>
+    </view>
+  </view>
+</view>

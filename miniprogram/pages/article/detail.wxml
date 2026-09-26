@@ -1,0 +1,37 @@
+<view class="page-article">
+  <view class="detail-card">
+    <!-- 标题 -->
+    <view class="detail-title">{{article.title}}</view>
+
+    <!-- 元信息 -->
+    <view class="detail-meta">
+      <text class="meta-author">{{article.author || '匿名用户'}}</text>
+      <text class="meta-dot">·</text>
+      <text>{{article.createTime}}</text>
+      <text class="meta-dot">·</text>
+      <text>{{article.views}} 阅读</text>
+      <view class="detail-fav-btn {{isFavorited ? 'fav-on' : ''}}" catchtap="toggleFavorite">
+        <text class="detail-fav-star">{{isFavorited ? '★' : '☆'}}</text>
+        <text class="detail-fav-text">{{isFavorited ? '已收藏' : '收藏'}}</text>
+      </view>
+    </view>
+
+    <!-- 标签 -->
+    <view class="detail-tags" wx:if="{{article.tags && article.tags.length}}">
+      <view class="detail-tag" wx:for="{{article.tags}}" wx:key="*this">{{item}}</view>
+    </view>
+
+    <!-- 图片轮播 -->
+    <swiper wx:if="{{images.length > 0}}" class="detail-swiper" indicator-dots="{{images.length > 1}}" autoplay="{{false}}" circular="{{true}}" previous-margin="0" next-margin="0">
+      <swiper-item wx:for="{{images}}" wx:key="*this">
+        <image class="swiper-img" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-src="{{item}}" />
+      </swiper-item>
+    </swiper>
+
+    <!-- 摘要 -->
+    <view class="detail-summary" wx:if="{{article.summary}}">{{article.summary}}</view>
+
+    <!-- 正文 Markdown 渲染 -->
+    <rich-text nodes="{{contentNodes}}" class="detail-content"></rich-text>
+  </view>
+</view>

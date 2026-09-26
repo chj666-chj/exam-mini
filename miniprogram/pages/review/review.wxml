@@ -1,0 +1,43 @@
+<view class="review">
+  <view wx:if="{{loading}}" class="state-box">
+    <view class="state-text">加载中...</view>
+  </view>
+
+  <view wx:if="{{error}}" class="state-box">
+    <view class="state-text error">{{error}}</view>
+  </view>
+
+  <view wx:if="{{!loading && !error}}">
+    <view class="progress-bar">
+      <view class="progress-info">
+        <text class="progress-label">答题回顾</text>
+        <text class="progress-count">{{currentIndex + 1}} / {{total}}</text>
+      </view>
+      <progress percent="{{percent}}" color="#4A90F3" active stroke-width="6" />
+    </view>
+
+    <view class="question-card">
+      <view class="question-type">{{question.qtype === 'multiple' ? '多选题' : question.qtype === 'judge' ? '判断题' : '单选题'}}</view>
+      <view class="question-title">{{question.title}}</view>
+      <view class="review-hint">正确答案已标注</view>
+      <view class="question-options">
+        <view
+          wx:for="{{options}}"
+          wx:key="code"
+          class="option-item {{item.isCorrect ? 'correct' : ''}}"
+        >
+          <view class="option-marker">
+            <view class="marker-circle {{item.isCorrect ? 'marker-correct' : ''}}"></view>
+          </view>
+          <view class="option-content">{{item.code}}. {{item.content}}</view>
+          <view wx:if="{{item.isCorrect}}" class="answer-tag">正确答案</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="nav-bar">
+      <view class="nav-btn nav-prev {{currentIndex === 0 ? 'disabled' : ''}}" bindtap="goPrev">上一题</view>
+      <view class="nav-btn nav-next" bindtap="goNext">{{btnText}}</view>
+    </view>
+  </view>
+</view>

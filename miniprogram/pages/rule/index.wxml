@@ -1,0 +1,12 @@
+<view class="page-rule">
+    <view class="title">
+    <text>{{title}}：</text>
+    </view>
+    <view class="content">
+        <view wx:if="{{loading}}" class="loading-tip">加载中...</view>
+        <view class="item" wx:for="{{items}}" wx:key="index">
+        <text>{{index + 1}}、{{item}}</text>
+        </view>
+    </view>
+</view>
+

@@ -1,0 +1,141 @@
+<view class="page-result">
+  <view class="score-hero {{(examMode || assessmentMode) && score < 60 ? 'hero-fail' : ''}}">
+    <view class="hero-curve"></view>
+    <view class="hero-content">
+      <view class="hero-label">{{assessmentMode ? '自我测评报告' : (examMode ? '模拟考试成绩' : '答题得分')}}</view>
+      <view class="hero-score">
+        <text class="score-num">{{score}}</text>
+        <text class="score-unit">分</text>
+      </view>
+      <view class="hero-sub">满分 {{length}} 分 · 得分率 {{score}}%</view>
+      <view wx:if="{{examMode}}" class="hero-pass {{passed ? 'pass-ok' : 'pass-fail'}}">
+        {{passed ? '考核通过' : '未达到及格线(60分)'}}
+      </view>
+      <view wx:if="{{assessmentMode && scoreTrend}}" class="hero-trend">
+        <text>上次: {{prevScore}}分</text>
+        <text class="trend-arrow {{scoreTrend}}">{{scoreTrend === 'up' ? ' 上升' : (scoreTrend === 'down' ? ' 下降' : ' 持平')}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 考试/测评模式额外信息 -->
+  <view wx:if="{{examMode || assessmentMode}}" class="exam-info-bar">
+    <view class="exam-info-item">
+      <text class="exam-info-label">{{assessmentMode ? '测评' : '考试'}}用时</text>
+      <text class="exam-info-value">{{durationDisplay || '未记录'}}</text>
+    </view>
+    <view class="exam-info-item">
+      <text class="exam-info-label">题目总数</text>
+      <text class="exam-info-value">{{length}} 题</text>
+    </view>
+    <view wx:if="{{avgTimePerQuestion}}" class="exam-info-item">
+      <text class="exam-info-label">平均每题</text>
+      <text class="exam-info-value">{{avgTimePerQuestion}}</text>
+    </view>
+  </view>
+
+  <view class="stats-row">
+    <view class="stat-card stat-right">
+      <view class="stat-num">{{rightNum}}</view>
+      <view class="stat-label">答对</view>
+    </view>
+    <view class="stat-card stat-err">
+      <view class="stat-num">{{errNum}}</view>
+      <view class="stat-label">答错</view>
+    </view>
+    <view class="stat-card stat-skip">
+      <view class="stat-num">{{unAnswerNum}}</view>
+      <view class="stat-label">未答</view>
+    </view>
+  </view>
+
+  <!-- 测评报告: 多维度分析 -->
+  <view wx:if="{{assessmentMode && assessmentResults}}" class="report-section">
+    <view class="report-title">多维度分析</view>
+
+    <view class="report-card" wx:if="{{assessmentResults.byQtype}}">
+      <view class="report-card-title">各题型分析</view>
+      <view class="report-bar-row" wx:for="{{assessmentResults.byQtype}}" wx:for-index="qtKey" wx:for-item="qtStat" wx:key="qtKey">
+        <text class="bar-label">{{qtKey === 'single' ? '单选题' : (qtKey === 'multiple' ? '多选题' : '判断题')}}</text>
+        <view class="bar-track">
+          <view class="bar-fill" style="width:{{qtStat.rate}}%; background:{{qtStat.rate >= 60 ? '#4A90F3' : '#E24B4A'}}"></view>
+        </view>
+        <text class="bar-value">{{qtStat.right}}/{{qtStat.total}} ({{qtStat.rate}}%)</text>
+      </view>
+    </view>
+
+    <view class="report-card" wx:if="{{assessmentResults.byDifficulty}}">
+      <view class="report-card-title">各难度分析</view>
+      <view class="report-bar-row" wx:for="{{assessmentResults.byDifficulty}}" wx:for-index="diffKey" wx:for-item="diffStat" wx:key="diffKey">
+        <text class="bar-label">{{diffKey === '1' ? '简单' : (diffKey === '2' ? '中等' : '困难')}}</text>
+        <view class="bar-track">
+          <view class="bar-fill" style="width:{{diffStat.rate}}%; background:{{diffStat.rate >= 60 ? '#1D9E75' : '#E24B4A'}}"></view>
+        </view>
+        <text class="bar-value">{{diffStat.right}}/{{diffStat.total}} ({{diffStat.rate}}%)</text>
+      </view>
+    </view>
+
+    <view class="report-card" wx:if="{{assessmentResults.byChapter && assessmentResults.byChapter.length > 0}}">
+      <view class="report-card-title">各章节分析</view>
+      <view class="report-bar-row" wx:for="{{assessmentResults.byChapter}}" wx:key="chapterId">
+        <text class="bar-label bar-label-sm">章节{{index + 1}}</text>
+        <view class="bar-track">
+          <view class="bar-fill" style="width:{{item.rate}}%; background:{{item.rate >= 60 ? '#4A90F3' : '#EF9F27'}}"></view>
+        </view>
+        <text class="bar-value">{{item.right}}/{{item.total}} ({{item.rate}}%)</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 测评报告: 薄弱知识点 -->
+  <view wx:if="{{assessmentMode && weakPoints.length > 0}}" class="report-section">
+    <view class="report-title">薄弱知识点</view>
+    <view class="weak-kp-list">
+      <view class="weak-kp-item" wx:for="{{weakPoints}}" wx:key="kpId">
+        <view class="weak-kp-dot"></view>
+        <text class="weak-kp-name">{{item.kpName}}</text>
+        <text class="weak-kp-rate">{{item.rate}}%</text>
+      </view>
+    </view>
+    <view class="weak-kp-action" bindtap="goPracticeWeakKp">
+      <text>去刷知识点 ></text>
+    </view>
+  </view>
+
+  <!-- 测评报告: 学习建议 -->
+  <view wx:if="{{assessmentMode && suggestion}}" class="report-section">
+    <view class="report-title">学习建议</view>
+    <view class="suggestion-box">
+      <text>{{suggestion}}</text>
+    </view>
+  </view>
+
+  <view class="action-list">
+    <view class="action-item" bindtap="examBack">
+      <view class="action-icon icon-wrong"></view>
+      <view class="action-info">
+        <view class="action-title">查看错题</view>
+        <view class="action-desc">做错 {{errNum}} 题，点击回顾错题</view>
+      </view>
+      <view class="action-arrow">></view>
+    </view>
+
+    <view class="action-item" bindtap="goScore">
+      <view class="action-icon icon-score"></view>
+      <view class="action-info">
+        <view class="action-title">{{assessmentMode ? '测评成绩' : '考试成绩'}}</view>
+        <view class="action-desc">用时、正确率与排名</view>
+      </view>
+      <view class="action-arrow">></view>
+    </view>
+
+    <view class="action-item" bindtap="exam_repeat">
+      <view class="action-icon icon-retake"></view>
+      <view class="action-info">
+        <view class="action-title">{{assessmentMode ? '再次测评' : '重新考试'}}</view>
+        <view class="action-desc">继续努力，再来一次</view>
+      </view>
+      <view class="action-arrow">></view>
+    </view>
+  </view>
+</view>

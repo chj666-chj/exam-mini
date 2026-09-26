@@ -1,0 +1,59 @@
+<view class="page-question">
+  <view wx:if="{{loading}}" class="state-box">
+    <view class="state-text">加载中...</view>
+  </view>
+
+  <view wx:if="{{error}}" class="state-box">
+    <view class="state-text error">{{error}}</view>
+  </view>
+
+  <!-- 全部已答完状态 -->
+  <view wx:if="{{!loading && !error && allAnswered}}" class="state-box all-done-box">
+    <view class="all-done-icon">&#10003;</view>
+    <view class="all-done-title">本题库已全部作答</view>
+    <view class="all-done-desc">共 {{totalBeforeFilter}} 题，已全部完成，无需再练</view>
+    <view class="all-done-btn" bindtap="goHome">返回首页</view>
+  </view>
+
+  <view wx:if="{{!loading && !error && !allAnswered}}">
+    <view class="header-bar">
+      <text class="header-title">{{undone ? '未作习题' : (mode === 'memorize' ? '背题模式 - 列表' : '列表模式')}}</text>
+      <text class="header-count">共 {{total}} 题</text>
+    </view>
+
+    <!-- 未作习题模式：显示过滤信息 -->
+    <view wx:if="{{undone && undoneSkipped > 0}}" class="undone-info-bar">
+      已跳过 {{undoneSkipped}} 道已答题目，展示 {{total}} 道未作答习题
+    </view>
+
+    <view class="question-list">
+      <view wx:for="{{questions}}" wx:key="_id" wx:for-index="qidx" class="question-card">
+        <view class="question-header">
+          <view class="question-num">{{qidx + 1}}</view>
+          <view class="question-type-tag">{{item.qtype === 'multiple' ? '多选' : item.qtype === 'judge' ? '判断' : '单选'}}</view>
+        </view>
+        <view class="question-title">{{item.title}}</view>
+        <view class="options-list">
+          <view
+            wx:for="{{item.options}}"
+            wx:for-item="opt"
+            wx:for-index="oidx"
+            wx:key="code"
+            class="option-row {{opt.selected ? 'opt-selected' : ''}} {{showAnswers && opt.isCorrect ? 'opt-correct' : ''}} {{showAnswers && opt.selected && !opt.isCorrect ? 'opt-wrong' : ''}}"
+            data-qidx="{{qidx}}"
+            data-code="{{opt.code}}"
+            bindtap="selectOption"
+          >
+            <view class="opt-marker {{opt.selected ? 'marker-on' : ''}} {{showAnswers && opt.isCorrect ? 'marker-correct' : ''}}"></view>
+            <text class="opt-text">{{opt.code}}. {{opt.content}}</text>
+            <text wx:if="{{showAnswers && opt.isCorrect}}" class="opt-answer-tag">正确答案</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{mode !== 'memorize'}}" class="submit-bar">
+      <button class="btn-submit" bindtap="submitAnswers">提交答案</button>
+    </view>
+  </view>
+</view>

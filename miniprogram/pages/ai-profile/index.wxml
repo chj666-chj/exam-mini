@@ -1,0 +1,126 @@
+<view class="page-ai-profile">
+  <!-- 生成报告按钮 -->
+  <view class="gen-btn-area">
+    <view
+      class="gen-btn {{generating ? 'gen-btn-disabled' : ''}}"
+      bindtap="generateProfile"
+    >
+      <text wx:if="{{!generating}}">📊 生成分析报告</text>
+      <text wx:if="{{generating}}">生成中... {{genPercent}}%</text>
+    </view>
+    <view wx:if="{{generating}}" class="gen-progress-bar">
+      <view class="gen-progress-fill" style="width: {{genPercent}}%"></view>
+    </view>
+    <view wx:if="{{generating}}" class="gen-status-text">{{genStatusText}}</view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{!loading && !profile && !generating}}" class="empty-state">
+    <view class="empty-icon">📈</view>
+    <view class="empty-text">暂无分析数据</view>
+    <view class="empty-hint">请先答题 20 题以上，再点击「生成分析报告」获取个性化学习画像</view>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <!-- 画像内容 -->
+  <block wx:if="{{profile}}">
+    <!-- 概览统计 -->
+    <view class="overview-card">
+      <view class="overview-item">
+        <view class="overview-num">{{avgAccuracy}}%</view>
+        <view class="overview-label">平均正确率</view>
+      </view>
+      <view class="overview-divider"></view>
+      <view class="overview-item">
+        <view class="overview-num">{{totalQuestions}}</view>
+        <view class="overview-label">累计答题</view>
+      </view>
+    </view>
+
+    <!-- 能力雷达图 -->
+    <view class="section-card">
+      <view class="section-title">能力分布</view>
+      <canvas
+        type="2d"
+        id="radarCanvas"
+        class="chart-canvas"
+        style="width: {{canvasWidth}}px; height: {{canvasHeight}}px;"
+      ></canvas>
+    </view>
+
+    <!-- 薄弱知识点 -->
+    <view class="section-card" wx:if="{{weakPoints.length > 0}}">
+      <view class="section-title">薄弱知识点</view>
+      <view
+        wx:for="{{weakPoints}}"
+        wx:key="index"
+        class="weak-item"
+      >
+        <view class="weak-header">
+          <view class="weak-name">{{item.name || item.knowledge_point || '未知知识点'}}</view>
+          <view class="weak-acc weak-acc-{{item.accuracyLevel}}">{{item.accuracyPercent}}%</view>
+        </view>
+        <view class="weak-meta">
+          <text class="weak-total">共 {{item.totalCount}} 题</text>
+        </view>
+        <view class="weak-rec">
+          <text class="weak-rec-icon">💡</text>
+          <text class="weak-rec-text">{{item.recommendation}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 错误模式分析 -->
+    <view class="section-card" wx:if="{{errorPatterns.length > 0}}">
+      <view class="section-title">错误模式分析</view>
+      <view
+        wx:for="{{errorPatterns}}"
+        wx:key="index"
+        class="error-item"
+      >
+        <view class="error-header">
+          <view class="error-type">{{item.typeName}}</view>
+          <view class="error-freq">{{item.frequencyText}}</view>
+        </view>
+        <view wx:if="{{item.descText}}" class="error-desc">{{item.descText}}</view>
+      </view>
+    </view>
+
+    <!-- 学习趋势 -->
+    <view class="section-card">
+      <view class="section-title">学习趋势（近{{trend.dates.length || 0}}次）</view>
+      <canvas
+        type="2d"
+        id="trendCanvas"
+        class="chart-canvas"
+        style="width: {{canvasWidth}}px; height: {{canvasHeight}}px;"
+      ></canvas>
+    </view>
+
+    <!-- 定向练习推荐 -->
+    <view class="section-card" wx:if="{{practiceRecs.length > 0}}">
+      <view class="section-title">定向练习推荐</view>
+      <view
+        wx:for="{{practiceRecs}}"
+        wx:key="index"
+        class="practice-item"
+        data-rec="{{item}}"
+        bindtap="onTapPractice"
+      >
+        <view class="practice-icon">🎯</view>
+        <view class="practice-content">
+          <view class="practice-name">{{item.kpName}}</view>
+          <view class="practice-meta">
+            <text class="practice-type">{{item.typeName}}</text>
+            <text class="practice-count">{{item.countText}}</text>
+          </view>
+        </view>
+        <view class="practice-arrow">›</view>
+      </view>
+    </view>
+  </block>
+</view>

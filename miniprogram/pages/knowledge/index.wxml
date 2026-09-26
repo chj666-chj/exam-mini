@@ -1,0 +1,85 @@
+<view class="page-knowledge">
+  <!-- 搜索栏 -->
+  <view class="kb-search-bar">
+    <view class="kb-search-input-wrap">
+      <text class="kb-search-icon">🔍</text>
+      <input
+        class="kb-search-input"
+        placeholder="搜索教材、笔记、总结..."
+        placeholder-class="kb-search-placeholder"
+        value="{{keyword}}"
+        bindinput="onSearchInput"
+        confirm-type="search"
+      />
+      <text wx:if="{{keyword}}" class="kb-search-clear" bindtap="onClearSearch">✕</text>
+    </view>
+  </view>
+
+  <!-- 分类标签区 -->
+  <scroll-view class="kb-category-scroll" scroll-x="true">
+    <view class="kb-category-list">
+      <view
+        wx:for="{{categories}}"
+        wx:key="key"
+        class="kb-cat-tag {{activeCategory === item.key ? 'cat-active' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onCategoryTap"
+      >
+        <text class="kb-cat-icon">{{item.icon}}</text>
+        <text class="kb-cat-label">{{item.label}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 收藏快捷入口 -->
+  <view class="kb-fav-bar" bindtap="goFavorites" wx:if="{{favCount > 0}}">
+    <view class="kb-fav-left">
+      <text class="kb-fav-icon">⭐</text>
+      <text class="kb-fav-text">我的收藏</text>
+    </view>
+    <view class="kb-fav-right">
+      <text class="kb-fav-count">{{favCount}}篇</text>
+      <text class="kb-fav-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="kb-loading">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{!loading && filteredList.length === 0}}" class="kb-empty">
+    <text class="kb-empty-icon">📚</text>
+    <text class="kb-empty-text">{{keyword ? '未找到相关文档' : '暂无知识库文档'}}</text>
+  </view>
+
+  <!-- 文档列表区 —— 所有资料同级展示 -->
+  <view wx:if="{{!loading && filteredList.length > 0}}" class="kb-doc-list">
+    <view
+      wx:for="{{filteredList}}"
+      wx:key="_id"
+      class="kb-doc-card {{item.typeColor}}"
+      data-id="{{item._id}}"
+      bindtap="openToc"
+    >
+      <view class="kb-doc-main">
+        <view class="kb-doc-header">
+          <text class="kb-doc-type-icon">{{item.typeIcon}}</text>
+          <text class="kb-doc-title">{{item.title}}</text>
+        </view>
+        <view wx:if="{{item.summary}}" class="kb-doc-summary">{{item.summary}}</view>
+        <view class="kb-doc-meta">
+          <view class="kb-doc-type-badge">{{item.typeLabel}}</view>
+          <text wx:if="{{item.category}}" class="kb-doc-category">{{item.category}}</text>
+          <text wx:if="{{item.tocCount > 0}}" class="kb-doc-toc-count">📑 {{item.tocCount}}节</text>
+          <text wx:if="{{item.pages > 0}}" class="kb-doc-pages">{{item.pages}}页</text>
+          <text class="kb-doc-views">阅读 {{item.views}}</text>
+        </view>
+      </view>
+      <view class="kb-doc-arrow">
+        <text class="kb-doc-arrow-icon">›</text>
+      </view>
+    </view>
+  </view>
+</view>

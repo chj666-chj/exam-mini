@@ -1,0 +1,54 @@
+<view class="page-list">
+  <view wx:if="{{loading}}" class="state-box">
+    <view class="state-text">加载中...</view>
+  </view>
+
+  <view wx:if="{{!loading && total === 0}}" class="state-box">
+    <view class="state-text">暂无答题记录</view>
+  </view>
+
+  <view wx:if="{{!loading && total > 0}}">
+    <view class="summary-card">
+      <view class="summary-item">
+        <view class="summary-num">{{total}}</view>
+        <view class="summary-label">总题数</view>
+      </view>
+      <view class="summary-item summary-right">
+        <view class="summary-num">{{rightNum}}</view>
+        <view class="summary-label">答对</view>
+      </view>
+      <view class="summary-item summary-err">
+        <view class="summary-num">{{errNum}}</view>
+        <view class="summary-label">答错</view>
+      </view>
+      <view class="summary-item summary-skip">
+        <view class="summary-num">{{unAnswered}}</view>
+        <view class="summary-label">未答</view>
+      </view>
+    </view>
+
+    <view class="question-list">
+      <view class="question-container" wx:for="{{questions}}" wx:key="idx">
+        <view class="question-header">
+          <view class="question-title">{{item.idx + 1}}. {{item.title}}</view>
+          <view class="tag {{item.answered ? (item.isRight ? 'tag-right' : 'tag-err') : 'tag-skip'}}">
+            {{item.answered ? (item.isRight ? '正确' : '错误') : '未答'}}
+          </view>
+        </view>
+        <view class="answer-row">
+          <text class="label">我的答案：</text>
+          <text class="value {{item.answered && !item.isRight ? 'wrong' : 'ok'}}">{{item.myCode}}</text>
+        </view>
+        <view class="answer-row" wx:if="{{item.answered && !item.isRight}}">
+          <text class="label">正确答案：</text>
+          <text class="value ok">{{item.rightCode}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="btn-area">
+      <button class="btn-primary" bindtap="goHistory">查看答题记录</button>
+      <button class="btn-plain" bindtap="goHome">返回首页</button>
+    </view>
+  </view>
+</view>

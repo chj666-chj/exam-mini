@@ -1,0 +1,78 @@
+<view class="page-setup">
+  <!-- 头部 -->
+  <view class="setup-hero">
+    <view class="hero-title">模拟考试</view>
+    <view class="hero-desc">配置考试参数，模拟真实考试环境</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="state-box">
+    <view class="state-text">加载中...</view>
+  </view>
+
+  <view wx:if="{{error}}" class="state-box">
+    <view class="state-text error">{{error}}</view>
+  </view>
+
+  <view wx:if="{{!loading && !error}}">
+    <!-- 考试科目选择 -->
+    <view class="config-section">
+      <view class="config-title">考试科目</view>
+      <picker bindchange="onExamChange" range="{{examList}}" range-key="name" value="{{examPickerIndex}}">
+        <view class="config-picker">
+          <text class="picker-value">{{selectedExamName}}</text>
+          <text class="picker-arrow">></text>
+        </view>
+      </picker>
+      <view class="config-hint">共 {{subjects.length}} 个章节，{{totalAvailable}} 道题目</view>
+    </view>
+
+    <!-- 题目数量 -->
+    <view class="config-section">
+      <view class="config-title">题目数量</view>
+      <picker bindchange="onCountChange" range="{{countOptions}}" value="{{countIndex}}">
+        <view class="config-picker">
+          <text class="picker-value">{{questionCount === 0 ? '全部题目' : questionCount + ' 题'}}</text>
+          <text class="picker-arrow">></text>
+        </view>
+      </picker>
+      <view class="config-hint">从题库中随机抽取指定数量的题目</view>
+    </view>
+
+    <!-- 考试时长 -->
+    <view class="config-section">
+      <view class="config-title">考试时长</view>
+      <picker bindchange="onTimeChange" range="{{timeLabels}}" value="{{timeIndex}}">
+        <view class="config-picker">
+          <text class="picker-value">{{timeLabels[timeIndex]}}</text>
+          <text class="picker-arrow">></text>
+        </view>
+      </picker>
+      <view class="config-hint">时间耗尽后自动交卷</view>
+    </view>
+
+    <!-- 跨章节混合 -->
+    <view class="config-section">
+      <view class="config-title">跨章节混合</view>
+      <view class="config-row" bindtap="toggleMixChapters">
+        <text class="config-desc">从所有章节中混合抽题</text>
+        <view class="switch-track {{mixChapters ? 'switch-on' : ''}}">
+          <view class="switch-thumb"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 考试须知 -->
+    <view class="notice-section">
+      <view class="notice-title">考试须知</view>
+      <view class="notice-item">1. 考试开始后倒计时，时间到自动交卷</view>
+      <view class="notice-item">2. 考试过程中不显示答案对错，交卷后统一判分</view>
+      <view class="notice-item">3. 可使用答题卡查看全部题目并跳转</view>
+      <view class="notice-item">4. 可随时主动交卷，未答题目计为错误</view>
+    </view>
+
+    <!-- 开始按钮 -->
+    <view class="btn-area">
+      <button class="btn-start-exam" bindtap="startExam">开始考试</button>
+    </view>
+  </view>
+</view>

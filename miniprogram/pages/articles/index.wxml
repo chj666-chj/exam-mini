@@ -1,0 +1,79 @@
+<view class="page-articles">
+  <!-- 写文章按钮 -->
+  <view class="write-btn" bindtap="openCreate">
+    <text class="write-btn-icon">✍</text>
+    <text>写文章</text>
+  </view>
+
+  <view wx:if="{{!list.length}}" class="empty">暂无文章</view>
+
+  <block wx:for="{{list}}" wx:key="_id">
+    <!-- 无图模式 -->
+    <view wx:if="{{item.imageCount === 0}}" class="article-card" bindtap="openDetail" data-id="{{item._id}}">
+      <view wx:if="{{item.isHot}}" class="hot-badge">🔥爆火</view>
+      <view class="article-title">{{item.title}}</view>
+      <view class="article-summary">{{item.summary}}</view>
+      <view class="tag-row" wx:if="{{item.displayTags.length}}">
+        <view class="tag-chip" wx:for="{{item.displayTags}}" wx:for-item="tag" wx:key="*this">{{tag}}</view>
+      </view>
+      <view class="article-meta">
+        <view class="meta-left">
+          <text class="author-text">{{item.author}}</text>
+          <text class="views-text">{{item.views}} 阅读</text>
+        </view>
+        <view class="fav-btn {{favIds[item._id] ? 'fav-on' : ''}}" catchtap="toggleFav" data-id="{{item._id}}">
+          <text class="fav-star">{{favIds[item._id] ? '★' : '☆'}}</text>
+          <text class="fav-text">{{favIds[item._id] ? '已收藏' : '收藏'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 单图模式 -->
+    <view wx:elif="{{item.imageCount === 1}}" class="article-card single-img-card" bindtap="openDetail" data-id="{{item._id}}">
+      <view wx:if="{{item.isHot}}" class="hot-badge">🔥爆火</view>
+      <view class="single-img-layout">
+        <view class="single-img-body">
+          <view class="article-title">{{item.title}}</view>
+          <view class="article-summary">{{item.summary}}</view>
+          <view class="tag-row" wx:if="{{item.displayTags.length}}">
+            <view class="tag-chip" wx:for="{{item.displayTags}}" wx:for-item="tag" wx:key="*this">{{tag}}</view>
+          </view>
+          <view class="article-meta">
+            <view class="meta-left">
+              <text class="author-text">{{item.author}}</text>
+              <text class="views-text">{{item.views}} 阅读</text>
+            </view>
+            <view class="fav-btn {{favIds[item._id] ? 'fav-on' : ''}}" catchtap="toggleFav" data-id="{{item._id}}">
+              <text class="fav-star">{{favIds[item._id] ? '★' : '☆'}}</text>
+              <text class="fav-text">{{favIds[item._id] ? '已收藏' : '收藏'}}</text>
+            </view>
+          </view>
+        </view>
+        <image class="single-img" src="{{item.displayImages[0]}}" mode="aspectFill" />
+      </view>
+    </view>
+
+    <!-- 多图模式 -->
+    <view wx:else class="article-card multi-img-card" bindtap="openDetail" data-id="{{item._id}}">
+      <view wx:if="{{item.isHot}}" class="hot-badge">🔥爆火</view>
+      <view class="article-title">{{item.title}}</view>
+      <view class="article-summary">{{item.summary}}</view>
+      <view class="multi-img-row">
+        <image class="multi-img" wx:for="{{item.displayImages}}" wx:for-item="img" wx:key="*this" src="{{img}}" mode="aspectFill" />
+      </view>
+      <view class="tag-row" wx:if="{{item.displayTags.length}}">
+        <view class="tag-chip" wx:for="{{item.displayTags}}" wx:for-item="tag" wx:key="*this">{{tag}}</view>
+      </view>
+      <view class="article-meta">
+        <view class="meta-left">
+          <text class="author-text">{{item.author}}</text>
+          <text class="views-text">{{item.views}} 阅读</text>
+        </view>
+        <view class="fav-btn {{favIds[item._id] ? 'fav-on' : ''}}" catchtap="toggleFav" data-id="{{item._id}}">
+          <text class="fav-star">{{favIds[item._id] ? '★' : '☆'}}</text>
+          <text class="fav-text">{{favIds[item._id] ? '已收藏' : '收藏'}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

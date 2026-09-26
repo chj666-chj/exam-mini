@@ -1,0 +1,47 @@
+<view class="md-editor">
+  <!-- 模式切换 -->
+  <view class="mode-tabs">
+    <view class="mode-tab {{mode === 'edit' ? 'mode-tab-active' : ''}}" data-mode="edit" bindtap="switchMode">编辑</view>
+    <view class="mode-tab {{mode === 'preview' ? 'mode-tab-active' : ''}}" data-mode="preview" bindtap="switchMode">预览</view>
+  </view>
+
+  <!-- 编辑模式 -->
+  <block wx:if="{{mode === 'edit'}}">
+    <!-- 工具栏 -->
+    <scroll-view scroll-x class="toolbar">
+      <view class="toolbar-inner">
+        <view
+          wx:for="{{toolbar}}"
+          wx:key="type"
+          class="toolbar-btn"
+          data-type="{{item.type}}"
+          bindtap="insertSyntax"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+
+    <!-- 编辑区 -->
+    <textarea
+      class="editor-textarea"
+      value="{{value}}"
+      bindinput="onInput"
+      bindblur="onBlur"
+      auto-height
+      placeholder="{{placeholder}}"
+      show-confirm-bar="{{false}}"
+      adjust-position="{{true}}"
+      maxlength="-1"
+    />
+
+    <!-- 字数统计 -->
+    <view class="word-count">{{value.length}} 字</view>
+  </block>
+
+  <!-- 预览模式 -->
+  <block wx:else>
+    <view class="preview-area">
+      <view wx:if="{{!value}}" class="preview-empty">暂无内容</view>
+      <rich-text wx:else nodes="{{previewNodes}}" class="preview-content"></rich-text>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,111 @@
+<view class="note">
+  <view wx:if="{{loading}}" class="state-box">
+    <view class="state-text">加载中...</view>
+  </view>
+
+  <view wx:if="{{error}}" class="state-box">
+    <view class="state-text error">{{error}}</view>
+  </view>
+
+  <view wx:if="{{empty}}" class="state-box">
+    <view class="empty-icon"></view>
+    <view class="empty-text">本次答题没有错题</view>
+    <view class="empty-sub">全部答对了，太棒了！</view>
+    <view class="empty-btn" bindtap="goHome">返回首页</view>
+  </view>
+
+  <view wx:if="{{!loading && !error && !empty}}">
+    <view class="progress-bar">
+      <view class="progress-info">
+        <text class="progress-label">错题回顾</text>
+        <text class="progress-count">{{currentIndex + 1}} / {{total}}</text>
+      </view>
+      <progress percent="{{percent}}" color="#e64340" active stroke-width="6" />
+    </view>
+
+    <!-- 已掌握状态条 -->
+    <view wx:if="{{currentResolved}}" class="resolved-banner">
+      <text>已标记为已掌握</text>
+    </view>
+
+    <view class="question-card">
+      <view class="question-header">
+        <view class="question-type">{{question.qtype === 'multiple' ? '多选题' : question.qtype === 'judge' ? '判断题' : '单选题'}}</view>
+        <view wx:if="{{currentResolved}}" class="resolved-tag">已掌握</view>
+      </view>
+      <view class="question-title">{{question.title}}</view>
+
+      <!-- 只读回顾模式（非重做时） -->
+      <block wx:if="{{!retryMode}}">
+        <view class="answer-compare">
+          <view class="compare-row">
+            <text class="compare-label">我的答案：</text>
+            <text class="compare-value wrong">{{userAnswer}}</text>
+          </view>
+        </view>
+
+        <view class="review-hint">正确答案已标注</view>
+        <view class="question-options">
+          <view
+            wx:for="{{options}}"
+            wx:key="code"
+            class="option-item {{item.isCorrect ? 'correct' : ''}} {{item.isUserChoice && !item.isCorrect ? 'wrong' : ''}}"
+          >
+            <view class="option-marker">
+              <view class="marker-circle {{item.isCorrect ? 'marker-correct' : ''}} {{item.isUserChoice && !item.isCorrect ? 'marker-wrong' : ''}}"></view>
+            </view>
+            <view class="option-content">{{item.code}}. {{item.content}}</view>
+            <view wx:if="{{item.isCorrect}}" class="answer-tag correct-tag">正确</view>
+            <view wx:if="{{item.isUserChoice && !item.isCorrect}}" class="answer-tag wrong-tag">你的选择</view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 重做模式 -->
+      <block wx:if="{{retryMode}}">
+        <view class="retry-hint">重做模式：请选择你认为是正确的答案</view>
+        <view class="question-options">
+          <view
+            wx:for="{{options}}"
+            wx:key="code"
+            class="option-item {{item.retrySelected ? 'retry-selected' : ''}} {{retryResult && item.isCorrect ? 'correct' : ''}} {{retryResult && item.retrySelected && !item.isCorrect ? 'wrong' : ''}}"
+            data-code="{{item.code}}"
+            bindtap="selectRetryOption"
+          >
+            <view class="option-marker">
+              <view class="marker-circle {{item.retrySelected ? 'marker-retry' : ''}} {{retryResult && item.isCorrect ? 'marker-correct' : ''}}"></view>
+            </view>
+            <view class="option-content">{{item.code}}. {{item.content}}</view>
+            <view wx:if="{{retryResult && item.isCorrect}}" class="answer-tag correct-tag">正确</view>
+            <view wx:if="{{retryResult && item.retrySelected && !item.isCorrect}}" class="answer-tag wrong-tag">你的选择</view>
+          </view>
+        </view>
+
+        <!-- 重做结果反馈 -->
+        <view wx:if="{{retryResult}}" class="retry-result {{retryCorrect ? 'retry-ok' : 'retry-fail'}}">
+          <text>{{retryCorrect ? '回答正确！已自动标记为已掌握' : '回答错误，正确答案已标注'}}</text>
+        </view>
+
+        <!-- 提交重做按钮 -->
+        <view wx:if="{{!retryResult}}" class="retry-submit-btn" bindtap="submitRetry">
+          <text>提交答案</text>
+        </view>
+      </block>
+
+      <!-- 操作按钮区 -->
+      <view class="note-actions">
+        <view class="note-act-btn retry-btn {{retryMode ? 'active' : ''}}" bindtap="toggleRetry">
+          <text>{{retryMode ? '退出重做' : '重做此题'}}</text>
+        </view>
+        <view class="note-act-btn resolved-btn {{currentResolved ? 'resolved-on' : ''}}" bindtap="toggleResolved">
+          <text>{{currentResolved ? '取消标记' : '标记已掌握'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="nav-bar">
+      <view class="nav-btn nav-prev {{currentIndex === 0 ? 'disabled' : ''}}" bindtap="goPrev">上一题</view>
+      <view class="nav-btn nav-next" bindtap="goNext">{{btnText}}</view>
+    </view>
+  </view>
+</view>

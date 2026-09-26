@@ -1,0 +1,250 @@
+/**app.wxss — 考试宝小程序设计系统**/
+
+/* ===== 色彩体系 ===== */
+page {
+  --c-primary: #4A90F3;
+  --c-primary-dark: #3a7bd5;
+  --c-primary-light: #e6f1fb;
+  --c-success: #1bcfad;
+  --c-success-light: #e8f8f0;
+  --c-warning: #d4a017;
+  --c-warning-light: #fff8e8;
+  --c-danger: #e64340;
+  --c-danger-light: #fde8e8;
+  --c-info: #909399;
+  --c-info-light: #f4f4f5;
+  --c-purple: #8b5cf6;
+  --c-purple-light: #f3e8ff;
+
+  /* 文字色 */
+  --c-text: #333;
+  --c-text-secondary: #666;
+  --c-text-muted: #999;
+  --c-text-light: #c0c4cc;
+
+  /* 背景色 */
+  --c-bg: #f0f2f5;
+  --c-bg-white: #fff;
+  --c-bg-gray: #f5f7fa;
+
+  /* 边框色 */
+  --c-border: #e4e7ed;
+  --c-border-light: #f0f2f5;
+
+  /* 圆角 */
+  --r-sm: 8rpx;
+  --r-md: 16rpx;
+  --r-lg: 24rpx;
+  --r-xl: 32rpx;
+
+  /* 阴影 */
+  --shadow-sm: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  --shadow-md: 0 4rpx 16rpx rgba(0,0,0,0.06);
+  --shadow-lg: 0 8rpx 24rpx rgba(0,0,0,0.08);
+
+  /* 间距 */
+  --sp-xs: 8rpx;
+  --sp-sm: 16rpx;
+  --sp-md: 24rpx;
+  --sp-lg: 32rpx;
+  --sp-xl: 48rpx;
+
+  background: var(--c-bg);
+  display: flex;
+  flex-direction: column;
+  font-size: 28rpx;
+  color: var(--c-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+/* ===== 通用容器 ===== */
+.container {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* ===== 通用卡片 ===== */
+.card {
+  background: var(--c-bg-white);
+  border-radius: var(--r-md);
+  padding: var(--sp-md);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== 区块标题 ===== */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: var(--sp-md) var(--sp-md) var(--sp-sm);
+}
+
+.section-title-bar {
+  width: 8rpx;
+  height: 32rpx;
+  border-radius: 4rpx;
+  background: var(--c-primary);
+  flex-shrink: 0;
+}
+
+.section-title-text {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--c-text);
+  flex: 1;
+}
+
+.section-badge {
+  font-size: 22rpx;
+  color: var(--c-primary);
+  background: var(--c-primary-light);
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+/* ===== 统计条 ===== */
+.stat-bar {
+  background: var(--c-bg-white);
+  border-radius: var(--r-md);
+  margin: var(--sp-sm) var(--sp-md);
+  padding: var(--sp-md) 0;
+  display: flex;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-item {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: var(--c-text-muted);
+  margin-bottom: 8rpx;
+}
+
+.stat-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--c-text);
+  line-height: 1.2;
+}
+
+.stat-sub {
+  font-size: 22rpx;
+  color: var(--c-text-muted);
+  margin-top: 6rpx;
+}
+
+.stat-divider {
+  width: 2rpx;
+  height: 60rpx;
+  background: var(--c-border-light);
+}
+
+/* ===== 通用标签 ===== */
+.tag {
+  font-size: 22rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.tag-primary { color: var(--c-primary); background: var(--c-primary-light); }
+.tag-success { color: var(--c-success); background: var(--c-success-light); }
+.tag-warning { color: var(--c-warning); background: var(--c-warning-light); }
+.tag-danger { color: var(--c-danger); background: var(--c-danger-light); }
+.tag-info { color: var(--c-info); background: var(--c-info-light); }
+.tag-purple { color: var(--c-purple); background: var(--c-purple-light); }
+
+/* ===== 图标底座 ===== */
+.icon-circle {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 32rpx;
+}
+
+.icon-circle-lg {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  font-size: 40rpx;
+}
+
+/* ===== 列表行 ===== */
+.list-row {
+  display: flex;
+  align-items: center;
+  padding: 32rpx 30rpx;
+  border-bottom: 1rpx solid var(--c-border-light);
+  gap: 20rpx;
+}
+
+.list-row:last-child {
+  border-bottom: none;
+}
+
+.list-row-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 30rpx;
+}
+
+.list-row-label {
+  flex: 1;
+  font-size: 30rpx;
+  color: var(--c-text);
+}
+
+.list-row-arrow {
+  color: var(--c-text-light);
+  font-size: 28rpx;
+}
+
+/* ===== 按钮 ===== */
+/* 微信原生 button 默认带有平台 padding 和 line-height，导致文字偏移。
+   全局重置 padding/margin 为 0，用 flex 居中替代 text-align + line-height，
+   确保所有机型上按钮文字水平 & 垂直双向居中。 */
+button {
+  background: initial;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  line-height: normal;
+}
+
+button:focus {
+  outline: 0;
+}
+
+button::after {
+  border: none;
+}
+
+/* ===== 空状态 ===== */
+.empty-state {
+  text-align: center;
+  padding: 80rpx 40rpx;
+  color: var(--c-text-muted);
+}
+
+.empty-state-text {
+  font-size: 28rpx;
+  margin-top: 20rpx;
+}

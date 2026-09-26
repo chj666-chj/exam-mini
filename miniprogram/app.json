@@ -1,0 +1,91 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/articles/index",
+    "pages/knowledge/index",
+    "pages/rank/index",
+    "pages/mine/index",
+    "pages/info/index",
+    "pages/subject/index",
+    "pages/entry/index",
+    "pages/question/index",
+    "pages/list/index",
+    "pages/simple/index",
+    "pages/exam/exam",
+    "pages/examresult/examresult",
+    "pages/result/result",
+    "pages/score/index",
+    "pages/history/index",
+    "pages/study/index",
+    "pages/detail/index",
+    "pages/look/index",
+    "pages/view/index",
+    "pages/note/note",
+    "pages/review/review",
+    "pages/about/index",
+    "pages/rule/index",
+    "pages/pay/index",
+    "pages/article/detail",
+    "pages/article/create",
+    "pages/ai-config/index",
+    "pages/favorites/index",
+    "pages/examsetup/index",
+    "pages/knowledgepoint/index",
+    "pages/assessment/index",
+    "pages/wrong/index",
+    "pages/knowledge/detail",
+    "pages/knowledge/toc",
+    "pages/ai-review/index",
+    "pages/ai-profile/index",
+    "pages/ai-qa/index",
+    "pages/ai-report/index",
+    "pages/ai-service/index"
+  ],
+  "window": {
+    "backgroundColor": "#F6F6F6",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#4A90F3",
+    "navigationBarTitleText": "考试助手",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#4A90F3",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "selectedIconPath": "icons/tab-home-on.png",
+        "iconPath": "icons/tab-home.png",
+        "pagePath": "pages/home/index",
+        "text": "首页"
+      },
+      {
+        "selectedIconPath": "icons/tab-article-on.png",
+        "iconPath": "icons/tab-article.png",
+        "pagePath": "pages/articles/index",
+        "text": "文章"
+      },
+      {
+        "selectedIconPath": "icons/tab-knowledge-on.png",
+        "iconPath": "icons/tab-knowledge.png",
+        "pagePath": "pages/knowledge/index",
+        "text": "知识库"
+      },
+      {
+        "selectedIconPath": "icons/tab-rank-on.png",
+        "iconPath": "icons/tab-rank.png",
+        "pagePath": "pages/rank/index",
+        "text": "排行榜"
+      },
+      {
+        "selectedIconPath": "icons/tab-mine-on.png",
+        "iconPath": "icons/tab-mine.png",
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

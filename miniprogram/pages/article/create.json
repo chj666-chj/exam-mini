@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "写文章",
+  "usingComponents": {
+    "md-editor": "/components/md-editor/md-editor"
+  }
+}

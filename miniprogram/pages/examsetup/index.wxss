@@ -1,0 +1,97 @@
+page { background-color: #f0f2f5; }
+.page-setup { min-height: 100vh; padding-bottom: 60rpx; }
+
+/* 头部 */
+.setup-hero {
+  background: linear-gradient(135deg, #4A90F3, #5b9bf5);
+  padding: 50rpx 30rpx 40rpx;
+  color: #fff;
+}
+.hero-title { font-size: 40rpx; font-weight: 600; }
+.hero-desc { font-size: 26rpx; opacity: 0.85; margin-top: 10rpx; }
+
+/* 状态 */
+.state-box { display: flex; flex-direction: column; align-items: center; padding: 160rpx 0; }
+.state-text { color: #999; font-size: 28rpx; }
+.state-text.error { color: #e64340; }
+
+/* 配置项 */
+.config-section {
+  margin: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+.config-title { font-size: 28rpx; font-weight: 600; color: #333; margin-bottom: 16rpx; }
+.config-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+  background: #f5f7fa;
+  border-radius: 12rpx;
+}
+.picker-value { font-size: 28rpx; color: #333; }
+.picker-arrow { font-size: 28rpx; color: #ccc; }
+.config-hint { font-size: 24rpx; color: #999; margin-top: 12rpx; }
+
+/* 开关行 */
+.config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10rpx 0;
+}
+.config-desc { font-size: 26rpx; color: #666; }
+
+.switch-track {
+  width: 88rpx;
+  height: 48rpx;
+  border-radius: 24rpx;
+  background: #e4e7ed;
+  position: relative;
+  transition: background 0.2s;
+}
+.switch-on { background: #4A90F3; }
+.switch-thumb {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 4rpx;
+  left: 4rpx;
+  transition: left 0.2s;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.15);
+}
+.switch-on .switch-thumb { left: 44rpx; }
+
+/* 须知 */
+.notice-section {
+  margin: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+.notice-title { font-size: 28rpx; font-weight: 600; color: #333; margin-bottom: 16rpx; }
+.notice-item { font-size: 24rpx; color: #999; line-height: 1.8; }
+
+/* 按钮 */
+.btn-area { padding: 30rpx; }
+.btn-start-exam {
+  background: #4A90F3;
+  color: #fff;
+  border-radius: 44rpx;
+  font-size: 34rpx;
+  height: 96rpx;
+  font-weight: 500;
+}
+.btn-start-exam::after { border: none; }
+
+/* 小屏适配 */
+@media (max-width: 320px) {
+  .hero-title { font-size: 36rpx; }
+  .config-title { font-size: 26rpx; }
+  .picker-value { font-size: 26rpx; }
+  .btn-start-exam { font-size: 30rpx; }
+}

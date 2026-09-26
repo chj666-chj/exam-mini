@@ -1,0 +1,124 @@
+.page-score {
+  min-height: 100vh;
+  background: #f0f2f5;
+}
+
+/* ===== 蓝色弧形背景 ===== */
+.score-hero {
+  background: linear-gradient(180deg, #5b9bf5, #4a90f3);
+  height: 380rpx;
+  position: relative;
+}
+
+.hero-curve {
+  position: absolute;
+  bottom: -2rpx;
+  left: 0;
+  right: 0;
+  height: 60rpx;
+  background: #f0f2f5;
+  border-radius: 100% 100% 0 0 / 100% 100% 0 0;
+}
+
+/* ===== 白色卡片 ===== */
+.score-card {
+  background: #fff;
+  border-radius: 20rpx;
+  margin: -230rpx 40rpx 0;
+  position: relative;
+  padding: 0 30rpx 40rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.06);
+}
+
+.avatar-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.score-avatar {
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 50%;
+  border: 8rpx solid #fff;
+  margin-top: -75rpx;
+  background: #eee;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.12);
+}
+
+.user-name {
+  text-align: center;
+  font-size: 32rpx;
+  color: #333;
+  margin-top: 16rpx;
+}
+
+.score-main {
+  text-align: center;
+  margin: 40rpx 0 30rpx;
+}
+
+.score-value {
+  font-size: 72rpx;
+  color: #4a90f3;
+  font-weight: 600;
+}
+
+.score-unit {
+  font-size: 30rpx;
+  color: #4a90f3;
+  margin-left: 6rpx;
+}
+
+.score-caption {
+  font-size: 26rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.score-stats {
+  display: flex;
+  border-top: 1rpx solid #f0f2f5;
+  padding-top: 30rpx;
+}
+
+.sstat {
+  flex: 1;
+  text-align: center;
+}
+
+.sstat-num {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.sstat-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+
+/* ===== 按钮 ===== */
+.btn-area {
+  margin: 50rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.btn {
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  padding: 22rpx 0;
+}
+
+.btn-primary {
+  background: #4a90f3;
+  color: #fff;
+}
+
+.btn-plain {
+  background: #fff;
+  color: #4a90f3;
+  border: 2rpx solid #4a90f3;
+}

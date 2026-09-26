@@ -1,0 +1,137 @@
+<view class="page-ai-config">
+  <!-- 说明 / 数量上限 -->
+  <view class="config-notice">
+    <view class="config-notice-title">模型配置说明</view>
+    <view class="config-notice-line">· 全局模型由管理员配置，对所有用户可用；「我的模型」由你自行添加（使用你自己的 API Key）。</view>
+    <view class="config-notice-line">· 数量上限：全局 {{meta.usage.global_max}} 个；每位用户最多 {{meta.usage.user_max}} 个自有模型（当前已有 {{meta.usage.user}} 个）。</view>
+    <view class="config-notice-line">· 默认模型：未在本次对话选择模型时，按「我的默认 → 全局默认」自动选择。</view>
+    <view class="config-notice-line">· 生效时机：{{meta.effectTiming}}</view>
+  </view>
+
+  <!-- 已配置列表 -->
+  <view class="config-list-header">
+    <text class="config-list-title">可用模型（{{models.length}}）</text>
+    <view class="config-add-btn" bindtap="showAddForm">+ 新增我的模型</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="config-empty">
+    <text class="config-empty-text">加载中...</text>
+  </view>
+
+  <view wx:elif="{{!models.length}}" class="config-empty">
+    <text class="config-empty-icon">🤖</text>
+    <text class="config-empty-text">暂无可用模型，点击「新增我的模型」添加你自己的模型</text>
+  </view>
+
+  <view wx:for="{{models}}" wx:key="_id"
+        class="config-card {{item._id === meta.userDefaultModelId ? 'config-card-selected' : ''}}">
+    <!-- 标记 -->
+    <view wx:if="{{item._id === meta.userDefaultModelId}}" class="config-selected-tag">我的默认</view>
+    <view wx:elif="{{item.isDefault}}" class="config-selected-tag config-selected-tag-global">全局默认</view>
+
+    <view class="config-card-header">
+      <view class="config-name">
+        {{item.name}}
+        <text class="config-scope-tag {{item.scope === 'user' ? 'scope-user' : 'scope-global'}}">
+          {{item.scope === 'user' ? '我的' : '全局'}}
+        </text>
+        <text wx:if="{{item.enabled === false}}" class="config-disabled-tag">已禁用</text>
+      </view>
+      <view class="config-actions">
+        <view class="config-action-btn" data-id="{{item._id}}" bindtap="testConfig">测试</view>
+        <block wx:if="{{item.scope === 'user'}}">
+          <view class="config-action-btn" data-id="{{item._id}}" bindtap="editConfig">编辑</view>
+          <view class="config-action-btn config-action-danger" data-id="{{item._id}}" bindtap="deleteConfig">删除</view>
+        </block>
+      </view>
+    </view>
+
+    <view class="config-card-body">
+      <view class="config-info-row">
+        <text class="config-info-label">模型</text>
+        <text class="config-info-value">{{item.model}}</text>
+      </view>
+      <view class="config-info-row">
+        <text class="config-info-label">接口</text>
+        <text class="config-info-value config-info-ellipsis">{{item.apiUrl}}</text>
+      </view>
+      <view class="config-info-row">
+        <text class="config-info-label">Key</text>
+        <text class="config-info-value">{{item.apiKey}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{item._id !== meta.userDefaultModelId}}" class="config-select-btn"
+          data-id="{{item._id}}" bindtap="selectConfig">
+      设为我的默认
+    </view>
+  </view>
+
+  <!-- 调用顺序 -->
+  <view wx:if="{{meta.resolutionOrder.length}}" class="config-order">
+    <view class="config-order-title">调用模型解析顺序</view>
+    <view wx:for="{{meta.resolutionOrder}}" wx:key="index" class="config-order-item">
+      {{index + 1}}. {{item}}
+    </view>
+  </view>
+
+  <!-- 新增/编辑弹窗 -->
+  <view wx:if="{{showForm}}" class="form-mask" bindtap="hideForm">
+    <view class="form-modal" catchtap="noop">
+      <view class="form-modal-title">{{editingId ? '编辑模型' : '新增我的模型'}}</view>
+
+      <view class="form-modal-field">
+        <text class="form-modal-label">模型名称 <text class="required">*</text></text>
+        <input class="form-modal-input" value="{{formData.name}}" bindinput="onFormInput"
+               data-field="name" placeholder="如：我的 DeepSeek" maxlength="30" />
+      </view>
+
+      <view class="form-modal-field">
+        <text class="form-modal-label">服务商</text>
+        <picker mode="selector" range="{{presetNames}}" value="{{presetIndex}}" bindchange="onProviderChange">
+          <view class="form-modal-picker">{{presetNames[presetIndex] || '自定义'}}</view>
+        </picker>
+      </view>
+
+      <view class="form-modal-field">
+        <text class="form-modal-label">接口地址 <text class="required">*</text></text>
+        <input class="form-modal-input" value="{{formData.apiUrl}}" bindinput="onFormInput"
+               data-field="apiUrl" placeholder="https://api.openai.com/v1/chat/completions" />
+      </view>
+
+      <view class="form-modal-field">
+        <text class="form-modal-label">API Key <text class="required">*</text></text>
+        <input class="form-modal-input" value="{{formData.apiKey}}" bindinput="onFormInput"
+               data-field="apiKey" placeholder="sk-...（已是 ****xxxx 表示保留原值）" password="{{true}}" />
+      </view>
+
+      <view class="form-modal-field">
+        <text class="form-modal-label">模型标识 <text class="required">*</text></text>
+        <input class="form-modal-input" value="{{formData.model}}" bindinput="onFormInput"
+               data-field="model" placeholder="gpt-4o-mini / deepseek-chat ..." />
+      </view>
+
+      <view class="form-modal-field">
+        <text class="form-modal-label">Temperature（0~2）</text>
+        <input class="form-modal-input" value="{{formData.temperature}}" bindinput="onFormInput"
+               data-field="temperature" type="digit" placeholder="0.7" />
+      </view>
+
+      <view class="form-modal-field">
+        <text class="form-modal-label">Max Tokens</text>
+        <input class="form-modal-input" value="{{formData.maxTokens}}" bindinput="onFormInput"
+               data-field="maxTokens" type="number" placeholder="2000" />
+      </view>
+
+      <view class="form-modal-field form-modal-field-row">
+        <text class="form-modal-label">启用</text>
+        <switch checked="{{formData.enabled}}" bindchange="onEnabledChange" color="#4A90F3" />
+      </view>
+
+      <view class="form-modal-actions">
+        <view class="form-modal-btn form-modal-cancel" bindtap="hideForm">取消</view>
+        <view class="form-modal-btn form-modal-confirm" bindtap="saveConfig">保存</view>
+      </view>
+    </view>
+  </view>
+</view>

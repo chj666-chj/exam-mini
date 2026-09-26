@@ -1,0 +1,86 @@
+<view class="page-ai-qa">
+  <!-- 顶部说明 -->
+  <view class="qa-header">
+    <view class="qa-header-title">知识库智能问答</view>
+    <view class="qa-header-sub">基于平台知识库与已加入的文章，为你解答备考疑问</view>
+    <view class="qa-model-bar">
+      <text class="qa-model-label">调用模型</text>
+      <picker wx:if="{{modelNames.length}}" mode="selector" range="{{modelNames}}"
+              value="{{modelIndex}}" bindchange="onModelChange">
+        <view class="qa-model-picker">{{modelNames[modelIndex]}} ▾</view>
+      </picker>
+      <text wx:else class="qa-model-empty" bindtap="goModelConfig">未配置模型，去添加</text>
+    </view>
+  </view>
+
+  <!-- 消息列表 -->
+  <scroll-view
+    class="chat-scroll"
+    scroll-y
+    scroll-into-view="{{scrollIntoView}}"
+    scroll-with-animation
+  >
+    <!-- 推荐问题（首次进入，无消息时展示） -->
+    <view wx:if="{{messages.length === 0}}" class="recommend-area">
+      <view class="recommend-title">你可以这样问：</view>
+      <view
+        wx:for="{{recommendQuestions}}"
+        wx:key="index"
+        class="recommend-item"
+        data-q="{{item}}"
+        bindtap="onTapRecommend"
+      >{{item}}</view>
+    </view>
+
+    <!-- 消息气泡 -->
+    <view
+      wx:for="{{messages}}"
+      wx:key="index"
+      id="msg-{{index}}"
+      class="msg-row msg-row-{{item.role}}"
+    >
+      <view class="msg-bubble msg-bubble-{{item.role}}">
+        <view wx:if="{{item.loading}}" class="msg-loading">思考中...</view>
+        <block wx:else>
+          <rich-text wx:if="{{item.role === 'ai'}}" class="msg-text" nodes="{{item.nodes}}"></rich-text>
+          <text wx:else class="msg-text">{{item.text}}</text>
+        </block>
+
+        <!-- 来源标签（可点击查看：文章来源跳文章详情，知识库条目跳文档详情） -->
+        <view wx:if="{{item.role === 'ai' && item.sources.length > 0}}" class="msg-sources">
+          <text class="msg-sources-label">引用来源：</text>
+          <view
+            wx:for="{{item.sources}}"
+            wx:for-item="src"
+            wx:key="index"
+            class="msg-source-tag {{src.source === 'article' ? 'msg-source-article' : ''}}"
+            data-source="{{src}}"
+            catchtap="onTapSource"
+          >
+            <text class="msg-source-type">{{src.source === 'article' ? '文章' : '知识库'}}</text>
+            <text class="msg-source-title">{{src.title || src.doc_id}}</text>
+            <text wx:if="{{src.article_code}}" class="msg-source-code">{{src.article_code}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="chat-bottom-space"></view>
+  </scroll-view>
+
+  <!-- 底部输入栏 -->
+  <view class="chat-input-bar">
+    <input
+      class="chat-input"
+      value="{{inputValue}}"
+      placeholder="输入你的问题..."
+      confirm-type="send"
+      bindinput="onInput"
+      bindconfirm="onSendInput"
+      disabled="{{sending}}"
+    />
+    <view class="chat-send-btn {{sending ? 'chat-send-disabled' : ''}}" bindtap="onSendInput">
+      {{sending ? '发送中' : '发送'}}
+    </view>
+  </view>
+</view>

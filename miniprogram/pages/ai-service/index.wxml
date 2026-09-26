@@ -1,0 +1,82 @@
+<view class="page-ai-service">
+  <!-- 顶部说明 -->
+  <view class="cs-header">
+    <view class="cs-header-title">智能客服</view>
+    <view class="cs-header-sub">有备考或使用问题，随时问我</view>
+    <view class="cs-model-bar">
+      <text class="cs-model-label">调用模型</text>
+      <picker wx:if="{{modelNames.length}}" mode="selector" range="{{modelNames}}"
+              value="{{modelIndex}}" bindchange="onModelChange">
+        <view class="cs-model-picker">{{modelNames[modelIndex]}} ▾</view>
+      </picker>
+      <text wx:else class="cs-model-empty" bindtap="goModelConfig">未配置模型，去添加</text>
+    </view>
+  </view>
+
+  <!-- 消息列表 -->
+  <scroll-view
+    class="chat-scroll"
+    scroll-y
+    scroll-into-view="{{scrollIntoView}}"
+    scroll-with-animation
+  >
+    <!-- 常见问题快捷入口 -->
+    <view wx:if="{{messages.length === 0}}" class="quick-area">
+      <view class="quick-title">常见问题</view>
+      <view
+        wx:for="{{quickQuestions}}"
+        wx:key="index"
+        class="quick-item"
+        data-q="{{item}}"
+        bindtap="onTapQuick"
+      >{{item}}</view>
+    </view>
+
+    <!-- 消息气泡 -->
+    <view
+      wx:for="{{messages}}"
+      wx:key="index"
+      id="msg-{{index}}"
+      class="msg-row msg-row-{{item.role}}"
+    >
+      <view class="msg-bubble msg-bubble-{{item.role}}">
+        <view wx:if="{{item.loading}}" class="msg-loading">正在输入...</view>
+        <block wx:else>
+          <rich-text wx:if="{{item.role === 'ai'}}" class="msg-text" nodes="{{item.nodes}}"></rich-text>
+          <text wx:else class="msg-text">{{item.text}}</text>
+        </block>
+
+        <!-- 推荐追问 -->
+        <view wx:if="{{item.role === 'ai' && item.suggestions.length > 0}}" class="msg-suggestions">
+          <view
+            wx:for="{{item.suggestions}}"
+            wx:for-item="sg"
+            wx:key="index"
+            class="suggestion-chip"
+            data-q="{{sg}}"
+            catchtap="onTapSuggestion"
+          >{{sg}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="chat-bottom-space"></view>
+  </scroll-view>
+
+  <!-- 底部输入栏 -->
+  <view class="chat-input-bar">
+    <view class="cs-feedback-btn" bindtap="onSubmitFeedback">反馈</view>
+    <input
+      class="chat-input"
+      value="{{inputValue}}"
+      placeholder="输入你的问题..."
+      confirm-type="send"
+      bindinput="onInput"
+      bindconfirm="onSendInput"
+      disabled="{{sending}}"
+    />
+    <view class="chat-send-btn {{sending ? 'chat-send-disabled' : ''}}" bindtap="onSendInput">
+      {{sending ? '发送中' : '发送'}}
+    </view>
+  </view>
+</view>

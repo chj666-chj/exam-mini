@@ -1,0 +1,247 @@
+.page-home {
+  min-height: 100vh;
+  background: var(--c-bg);
+  padding-bottom: 40rpx;
+}
+
+/* ===== 科目选择栏目 ===== */
+.subject-select-section {
+  background: var(--c-bg-white);
+  margin: 20rpx 24rpx 0;
+  border-radius: var(--r-md);
+  padding: 24rpx 30rpx 20rpx;
+  box-shadow: var(--shadow-sm);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  gap: 16rpx;
+}
+
+.section-title-bar {
+  width: 8rpx;
+  height: 32rpx;
+  background: var(--c-primary);
+  border-radius: 4rpx;
+}
+
+.section-title-text {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--c-text);
+  flex: 1;
+}
+
+.section-badge {
+  padding: 4rpx 18rpx;
+  background: var(--c-primary-light);
+  color: var(--c-primary);
+  font-size: 22rpx;
+  border-radius: 20rpx;
+}
+
+/* 考试选择器 */
+.exam-picker-row {
+  margin-bottom: 20rpx;
+}
+
+.exam-picker {
+  width: 100%;
+}
+
+.picker-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--c-bg-gray);
+  border: 2rpx solid var(--c-border);
+  border-radius: var(--r-md);
+  padding: 20rpx 24rpx;
+}
+
+.picker-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.picker-icon-box {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 12rpx;
+  background: linear-gradient(135deg, #6ba7f7, #4a90f3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.picker-icon-text {
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.picker-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.picker-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--c-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker-hint {
+  font-size: 22rpx;
+  color: var(--c-text-muted);
+  margin-top: 4rpx;
+}
+
+.picker-arrow {
+  font-size: 24rpx;
+  color: var(--c-primary);
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+/* 无数据提示 */
+.no-data-hint {
+  text-align: center;
+  padding: 30rpx 0;
+  color: var(--c-text-muted);
+  font-size: 26rpx;
+}
+
+/* ===== 功能宫格 ===== */
+.menu-panel {
+  background: var(--c-bg-white);
+  margin: 20rpx 24rpx 0;
+  border-radius: var(--r-md);
+  padding: 36rpx 20rpx 20rpx;
+  box-shadow: var(--shadow-sm);
+}
+
+.menu-grid {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.menu-col {
+  display: flex;
+  flex-direction: column;
+  width: 200rpx;
+}
+
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 36rpx;
+}
+
+.menu-icon {
+  width: 96rpx;
+  height: 96rpx;
+  margin-bottom: 10rpx;
+}
+
+.menu-text {
+  font-size: 24rpx;
+  color: var(--c-text);
+}
+
+.menu-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20rpx;
+}
+
+.circle-btn {
+  width: 210rpx;
+  height: 210rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 32rpx;
+  margin-bottom: 50rpx;
+  box-shadow: 0 0 0 14rpx rgba(74, 144, 243, 0.12);
+}
+
+.circle-blue {
+  background: linear-gradient(160deg, #6ba7f7, var(--c-primary));
+  box-shadow: 0 0 0 14rpx rgba(74, 144, 243, 0.12);
+}
+
+.circle-green {
+  background: linear-gradient(160deg, #6fd7a3, #48c78e);
+  box-shadow: 0 0 0 14rpx rgba(72, 199, 142, 0.14);
+}
+
+/* ===== 列表行 ===== */
+.list-row {
+  background: var(--c-bg-white);
+  margin: 20rpx 24rpx 0;
+  border-radius: var(--r-md);
+  padding: 34rpx 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+}
+
+.exam-list .list-row {
+  margin-top: 2rpx;
+  border-radius: 0;
+}
+
+.exam-list .list-row:first-child {
+  border-radius: var(--r-md) var(--r-md) 0 0;
+}
+
+.exam-list .list-row:last-child {
+  border-radius: 0 0 var(--r-md) var(--r-md);
+  margin-bottom: 20rpx;
+}
+
+.row-title {
+  font-size: 30rpx;
+  color: var(--c-text);
+}
+
+.row-right {
+  display: flex;
+  align-items: center;
+}
+
+.row-hint {
+  font-size: 24rpx;
+  color: var(--c-text-muted);
+  margin-right: 12rpx;
+}
+
+.arraw {
+  color: var(--c-text-light);
+  font-size: 28rpx;
+}
+
+/* ===== 小屏幕适配 ===== */
+@media (max-width: 320px) {
+  .picker-name {
+    font-size: 28rpx;
+  }
+}

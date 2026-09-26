@@ -1,0 +1,84 @@
+<view class="page-create">
+  <!-- 标题 -->
+  <view class="form-section">
+    <view class="form-label">标题 <text class="required">*</text></view>
+    <input class="form-input" value="{{form.title}}" bindinput="onTitleInput" placeholder="请输入文章标题" maxlength="100" />
+  </view>
+
+  <!-- 摘要 -->
+  <view class="form-section">
+    <view class="form-label">摘要</view>
+    <textarea class="form-textarea" value="{{form.summary}}" bindinput="onSummaryInput" placeholder="一句话概括文章内容（可选）" maxlength="200" auto-height />
+  </view>
+
+  <!-- 图片选择 -->
+  <view class="form-section">
+    <view class="form-label">配图（最多3张）</view>
+    <view class="image-grid">
+      <view wx:for="{{form.images}}" wx:key="*this" class="image-item">
+        <image src="{{item}}" mode="aspectFill" class="image-thumb" bindtap="previewImage" data-src="{{item}}" />
+        <view class="image-remove" catchtap="removeImage" data-index="{{index}}">×</view>
+      </view>
+      <view wx:if="{{form.images.length < 3}}" class="image-add" bindtap="chooseImages">
+        <text class="image-add-icon">+</text>
+        <text class="image-add-text">添加图片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Markdown 编辑器 -->
+  <view class="form-section">
+    <view class="form-label">正文内容 <text class="required">*</text></view>
+    <md-editor value="{{form.content}}" bind:input="onEditorInput" placeholder="请输入文章正文，支持 Markdown 格式..." />
+  </view>
+
+  <!-- 标签 -->
+  <view class="form-section">
+    <view class="form-label">标签（最多5个）</view>
+    <view class="tag-list" wx:if="{{form.tags.length}}">
+      <view class="tag-item" wx:for="{{form.tags}}" wx:key="*this">
+        <text>{{item}}</text>
+        <text class="tag-remove" catchtap="removeTag" data-index="{{index}}">×</text>
+      </view>
+    </view>
+    <view class="tag-input-row">
+      <input class="tag-input" value="{{tagInput}}" bindinput="onTagInput" placeholder="输入标签" confirm-type="done" bindconfirm="addTag" />
+      <view class="tag-add-btn" bindtap="addTag">添加</view>
+    </view>
+  </view>
+
+  <!-- AI 辅助 -->
+  <view class="ai-section">
+    <!-- 调用模型选择（来自「AI 模型配置」，默认跟随我的默认模型） -->
+    <view class="ai-config-select" wx:if="{{modelNames.length > 0}}">
+      <view class="ai-config-label">调用模型</view>
+      <picker bindchange="onModelChange" value="{{modelIndex}}" range="{{modelNames}}">
+        <view class="ai-config-picker">
+          <text>{{modelNames[modelIndex] || '选择模型'}}</text>
+          <text class="picker-arrow">></text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- AI 按钮 -->
+    <button class="ai-btn {{aiLoading ? 'ai-btn-loading' : ''}}" bindtap="aiAssist" loading="{{aiLoading}}" disabled="{{aiLoading}}">
+      <text wx:if="{{!aiLoading}}">✍ AI 辅助撰写</text>
+      <text wx:else>{{aiProgressText || 'AI 生成中...'}}</text>
+    </button>
+
+    <!-- 取消按钮：AI 生成中可取消请求 -->
+    <view wx:if="{{aiCancelable}}" class="ai-cancel-btn" catchtap="cancelAI">取消请求</view>
+
+    <!-- 无配置提示 -->
+    <view wx:if="{{!modelNames.length}}" class="ai-no-config" bindtap="goAIConfig">
+      尚未配置 AI，点击前往配置 >
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-section">
+    <button class="submit-btn" type="primary" bindtap="submit" loading="{{submitting}}" disabled="{{submitting}}">
+      提交审核
+    </button>
+  </view>
+</view>

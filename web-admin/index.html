@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.ico" sizes="32x32 64x64" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>考试宝 · 管理后台</title>
+  <script>
+    // ===== 最早执行的噪音错误拦截器 =====
+    // 外部注入的 web-vitals 脚本（浏览器扩展/开发者工具）会在空 PerformanceEntry
+    // 上读取 startTime 导致 Uncaught TypeError，不属于项目代码。
+    // 此 inline script 先于一切 ES module 执行，从根源上拦截。
+    (function () {
+      var patterns = ['reportAllChanges', "reading 'startTime'", 'web-vitals'];
+      function shouldIgnore() {
+        var msg = '';
+        for (var i = 0; i < arguments.length; i++) {
+          var a = arguments[i];
+          if (typeof a === 'string') msg += ' ' + a;
+          else if (a && typeof a.message === 'string') msg += ' ' + a.message;
+          else if (a && typeof a.stack === 'string') msg += ' ' + a.stack;
+        }
+        for (var j = 0; j < patterns.length; j++) {
+          if (msg.indexOf(patterns[j]) !== -1) return true;
+        }
+        return false;
+      }
+      // 1) 拦截 window error 事件（捕获阶段，最先收到）
+      window.addEventListener('error', function (e) {
+        if (shouldIgnore(e.message, e.error, e.error && e.error.stack)) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return true;
+        }
+      }, true);
+      // 2) 拦截未处理的 Promise rejection
+      window.addEventListener('unhandledrejection', function (e) {
+        if (shouldIgnore(e.reason, e.reason && e.reason.message, e.reason && e.reason.stack)) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+        }
+      }, true);
+      // 3) 从根源修复：包装 PerformanceObserver，过滤掉 undefined entry
+      if (window.PerformanceObserver) {
+        var OrigPO = window.PerformanceObserver;
+        function SafePO(cb, options) {
+          return new OrigPO(function (list, obs) {
+            var entries = list && list.getEntries ? list.getEntries() : [];
+            for (var i = 0; i < entries.length; i++) {
+              if (entries[i] && typeof entries[i].startTime === 'undefined') {
+                entries[i] = new Proxy(entries[i], {
+                  get: function (t, p) {
+                    if (p === 'startTime') return 0;
+                    return t[p];
+                  }
+                });
+              }
+            }
+            try { cb(list, obs); } catch (_) {}
+          }, options);
+        }
+        SafePO.prototype = OrigPO.prototype;
+        SafePO.supportedEntryTypes = OrigPO.supportedEntryTypes;
+        window.PerformanceObserver = SafePO;
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

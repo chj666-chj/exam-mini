@@ -1,0 +1,61 @@
+<view class="page-wrong">
+  <view wx:if="{{!totalWrong}}" class="empty">
+    <image class="empty-icon" src="/icons/tab-wrong.png" mode="aspectFit" />
+    <view>太棒了，暂无错题～</view>
+  </view>
+
+  <block wx:if="{{totalWrong}}">
+    <!-- 错题概览 -->
+    <view class="wrong-summary">
+      <view class="summary-item">
+        <view class="summary-num">{{totalWrong}}</view>
+        <view class="summary-label">错题总数</view>
+      </view>
+      <view class="summary-divider"></view>
+      <view class="summary-item">
+        <view class="summary-num">{{unresolvedCount}}</view>
+        <view class="summary-label">未掌握</view>
+      </view>
+      <view class="summary-divider"></view>
+      <view class="summary-item">
+        <view class="summary-num">{{resolvedCount}}</view>
+        <view class="summary-label">已掌握</view>
+      </view>
+    </view>
+
+    <!-- 科目筛选 -->
+    <view class="exam-filter-bar" wx:if="{{examOptions.length > 1}}">
+      <picker class="exam-filter-picker" bindchange="onExamFilterChange" range="{{examOptions}}" range-key="label" value="{{examPickerIndex}}">
+        <view class="exam-filter-value">{{examOptions[examPickerIndex].label}}</view>
+      </picker>
+    </view>
+
+    <!-- 筛选 tab -->
+    <view class="filter-tabs">
+      <view class="filter-tab {{activeTab === 'all' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+      <view class="filter-tab {{activeTab === 'unresolved' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="unresolved">未掌握</view>
+      <view class="filter-tab {{activeTab === 'resolved' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="resolved">已掌握</view>
+    </view>
+
+    <!-- 筛选后无数据 -->
+    <view wx:if="{{!filteredGroups.length}}" class="empty small-empty">
+      <view>{{activeTab === 'resolved' ? '暂无已掌握的错题' : '暂无未掌握的错题'}}</view>
+    </view>
+
+    <!-- 场次列表 -->
+    <view class="group-item" wx:for="{{filteredGroups}}" wx:key="ordernum"
+          bindtap="goRedo" data-ordernum="{{item.ordernum}}">
+      <view class="group-info">
+        <view class="group-title">练习场次 {{item.ordernum}}</view>
+        <view class="group-meta">
+          {{item.createTime}} · {{item.displayCount}} 题
+          <text wx:if="{{item.resolvedCount > 0 && activeTab === 'all'}}" class="group-resolved-hint">（已掌握 {{item.resolvedCount}}）</text>
+        </view>
+      </view>
+      <view class="group-right">
+        <text class="redo-hint">去回顾</text>
+        <view class="arraw">></view>
+      </view>
+    </view>
+  </block>
+</view>

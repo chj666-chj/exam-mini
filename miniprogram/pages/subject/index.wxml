@@ -1,0 +1,28 @@
+<view class="page-subjects">
+  <view class="header-card">
+    <view class="header-title">{{modeTitle}}</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="state-box">
+    <view class="state-text">加载中...</view>
+  </view>
+
+  <view wx:if="{{error}}" class="state-box">
+    <view class="state-text error">{{error}}</view>
+    <view class="retry-btn" bindtap="onLoad" data-id="{{pid}}">重试</view>
+  </view>
+
+  <view wx:if="{{!loading && !error}}" class="subject-list">
+    <view
+      wx:for="{{subjects}}"
+      wx:key="_id"
+      class="subject-item"
+      bindtap="toEntryPage"
+      data-id="{{item._id}}"
+    >
+      <view class="subject-num">{{index + 1}}</view>
+      <view class="subject-name">{{item.name}}</view>
+      <view class="subject-arrow">></view>
+    </view>
+  </view>
+</view>

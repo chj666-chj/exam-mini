@@ -1,0 +1,88 @@
+<view class="activation-page">
+  <!-- 头部图标 -->
+  <view class="activation-header">
+    <view class="activation-icon">💎</view>
+    <view class="activation-title">激活码通道</view>
+    <view class="activation-desc">输入 6 位数字激活码，激活 VIP 权限</view>
+  </view>
+
+  <!-- VIP 状态提示 -->
+  <view wx:if="{{isVip}}" class="vip-status-card vip-active">
+    <view class="vip-badge">VIP</view>
+    <view class="vip-info">
+      <view class="vip-label">您已是 VIP 用户</view>
+      <view wx:if="{{vipExpireAt}}" class="vip-expire">{{vipExpireAt == 'permanent' ? '永久有效' : '到期：' + vipExpireAt}}</view>
+    </view>
+  </view>
+
+  <!-- 激活码输入区 -->
+  <view class="code-input-section" wx:if="{{!isVip}}">
+    <view class="code-digits" catchtap="noop">
+      <view
+        wx:for="{{codeDigits}}"
+        wx:key="index"
+        class="digit-box {{activeIndex === index ? 'active' : ''}} {{item ? 'filled' : ''}}"
+        data-index="{{index}}"
+        bindtap="onDigitTap"
+      >{{item}}</view>
+    </view>
+    <!-- 隐藏的统一输入框 -->
+    <input
+      class="hidden-input"
+      type="number"
+      maxlength="6"
+      value="{{codeDigits.join('')}}"
+      focus="{{true}}"
+      bindinput="onCodeInput"
+    />
+
+    <!-- 操作按钮 -->
+    <view class="code-actions">
+      <button class="btn-clear" bindtap="onClear" disabled="{{submitting}}">清空</button>
+      <button class="btn-activate" bindtap="onActivate" loading="{{submitting}}" disabled="{{submitting}}">
+        {{submitting ? '激活中...' : '立即激活'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 已是 VIP 也可再次激活（续期） -->
+  <view class="code-input-section" wx:if="{{isVip}}">
+    <view class="renew-hint">如需续期，请输入新的激活码</view>
+    <view class="code-digits" catchtap="noop">
+      <view
+        wx:for="{{codeDigits}}"
+        wx:key="index"
+        class="digit-box {{activeIndex === index ? 'active' : ''}} {{item ? 'filled' : ''}}"
+        data-index="{{index}}"
+        bindtap="onDigitTap"
+      >{{item}}</view>
+    </view>
+    <input
+      class="hidden-input"
+      type="number"
+      maxlength="6"
+      value="{{codeDigits.join('')}}"
+      bindinput="onCodeInput"
+    />
+    <view class="code-actions">
+      <button class="btn-clear" bindtap="onClear" disabled="{{submitting}}">清空</button>
+      <button class="btn-activate" bindtap="onActivate" loading="{{submitting}}" disabled="{{submitting}}">
+        {{submitting ? '激活中...' : '续期激活'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 结果提示 -->
+  <view wx:if="{{resultMsg}}" class="result-msg {{resultType}}">
+    <text>{{resultMsg}}</text>
+  </view>
+
+  <!-- 底部说明 -->
+  <view class="activation-footer">
+    <view class="footer-item">· 激活码为 6 位数字，每个码仅可使用一次</view>
+    <view class="footer-item">· 激活后 VIP 权限立即生效</view>
+    <view class="footer-item">· 如遇激活码无效或已过期，请联系管理员</view>
+  </view>
+
+  <view class="go-home-link" bindtap="goHome">返回首页</view>
+</view>

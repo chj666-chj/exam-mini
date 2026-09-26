@@ -1,0 +1,143 @@
+page { background-color: #f0f2f5; }
+.page-result { min-height: 100vh; padding-bottom: 40rpx; }
+
+.score-hero {
+  background: linear-gradient(180deg, #4A90F3, #5b9bf5);
+  height: 320rpx;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.hero-curve {
+  position: absolute;
+  bottom: -2rpx;
+  left: 0;
+  right: 0;
+  height: 50rpx;
+  background: #f0f2f5;
+  border-radius: 100% 100% 0 0 / 100% 100% 0 0;
+}
+.hero-content { text-align: center; z-index: 1; }
+.hero-label { font-size: 28rpx; opacity: 0.85; }
+.hero-score { display: flex; align-items: baseline; justify-content: center; margin: 10rpx 0; }
+.score-num { font-size: 80rpx; font-weight: 700; }
+.score-unit { font-size: 32rpx; margin-left: 8rpx; }
+.hero-sub { font-size: 24rpx; opacity: 0.75; }
+
+.hero-pass {
+  display: inline-block;
+  margin-top: 16rpx;
+  padding: 8rpx 32rpx;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+}
+.pass-ok { background: rgba(27,207,173,0.3); color: #fff; }
+.pass-fail { background: rgba(230,67,64,0.3); color: #fff; }
+.score-hero.hero-fail { background: linear-gradient(180deg, #e64340, #f56c6c); }
+
+/* 考试模式信息条 */
+.exam-info-bar {
+  display: flex;
+  margin: 0 20rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx 0;
+  margin-top: 16rpx;
+}
+.exam-info-item {
+  flex: 1;
+  text-align: center;
+}
+.exam-info-label { display: block; font-size: 24rpx; color: #999; }
+.exam-info-value { display: block; font-size: 30rpx; color: #333; font-weight: 500; margin-top: 8rpx; }
+
+.stats-row {
+  display: flex;
+  gap: 16rpx;
+  padding: 0 20rpx;
+  margin-top: -40rpx;
+  position: relative;
+  z-index: 2;
+}
+.stat-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx 0;
+  text-align: center;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.06);
+}
+.stat-num { font-size: 40rpx; font-weight: 700; }
+.stat-label { font-size: 24rpx; color: #999; margin-top: 8rpx; }
+.stat-right .stat-num { color: #1bcfad; }
+.stat-err .stat-num { color: #e64340; }
+.stat-skip .stat-num { color: #f5a623; }
+
+.action-list { margin: 30rpx 20rpx; background: #fff; border-radius: 16rpx; overflow: hidden; }
+.action-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 24rpx;
+  border-bottom: 2rpx solid #f5f5f5;
+}
+.action-item:last-child { border-bottom: none; }
+.action-icon {
+  width: 72rpx; height: 72rpx; border-radius: 16rpx;
+  margin-right: 24rpx; flex-shrink: 0;
+}
+.icon-wrong { background: #fde8e8; border: 2rpx solid #e64340; }
+.icon-score { background: #e6f1fb; border: 2rpx solid #4A90F3; }
+.icon-retake { background: #e8f8f0; border: 2rpx solid #1bcfad; }
+.action-info { flex: 1; }
+.action-title { font-size: 30rpx; color: #333; font-weight: 500; }
+.action-desc { font-size: 24rpx; color: #999; margin-top: 6rpx; }
+.action-arrow { color: #ccc; font-size: 28rpx; }
+
+/* ===== 测评报告样式 ===== */
+.hero-trend { margin-top: 12rpx; font-size: 24rpx; opacity: 0.8; }
+.trend-arrow.up { color: #7CFC00; }
+.trend-arrow.down { color: #FFB347; }
+.trend-arrow.same { color: #fff; }
+
+.report-section { margin: 20rpx; }
+.report-title { font-size: 30rpx; font-weight: 600; color: #333; margin-bottom: 16rpx; }
+.report-card {
+  background: #fff; border-radius: 16rpx; padding: 24rpx 28rpx;
+  margin-bottom: 16rpx; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+.report-card-title { font-size: 26rpx; color: #666; margin-bottom: 16rpx; font-weight: 500; }
+.report-bar-row {
+  display: flex; align-items: center; padding: 12rpx 0;
+}
+.bar-label { font-size: 24rpx; color: #666; width: 100rpx; flex-shrink: 0; }
+.bar-label-sm { font-size: 22rpx; width: 80rpx; }
+.bar-track {
+  flex: 1; height: 16rpx; background: #f0f0f0; border-radius: 8rpx;
+  margin: 0 16rpx; overflow: hidden;
+}
+.bar-fill { height: 100%; border-radius: 8rpx; transition: width 0.3s; }
+.bar-value { font-size: 22rpx; color: #999; width: 160rpx; text-align: right; flex-shrink: 0; }
+
+.weak-kp-list { background: #fff; border-radius: 16rpx; padding: 16rpx 28rpx; }
+.weak-kp-item {
+  display: flex; align-items: center; padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+.weak-kp-item:last-child { border-bottom: none; }
+.weak-kp-dot { width: 12rpx; height: 12rpx; border-radius: 50%; background: #E24B4A; margin-right: 16rpx; flex-shrink: 0; }
+.weak-kp-name { flex: 1; font-size: 26rpx; color: #333; }
+.weak-kp-rate { font-size: 26rpx; color: #E24B4A; font-weight: 500; }
+.weak-kp-action {
+  display: flex; align-items: center; justify-content: center;
+  padding: 20rpx 0; margin-top: 12rpx;
+  font-size: 26rpx; color: #4A90F3; font-weight: 500;
+}
+
+.suggestion-box {
+  background: #fff; border-radius: 16rpx; padding: 24rpx 28rpx;
+  font-size: 26rpx; color: #666; line-height: 1.6;
+}

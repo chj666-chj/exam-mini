@@ -1,0 +1,114 @@
+<view class="page-fav">
+  <!-- 类型 Tab -->
+  <view class="fav-tabs" wx:if="{{!loading && !error}}">
+    <view wx:for="{{tabs}}" wx:key="key"
+          class="fav-tab {{activeTab === item.key ? 'active' : ''}}"
+          bindtap="onTabChange" data-key="{{item.key}}">
+      <text class="tab-label">{{item.label}}</text>
+      <text class="tab-count" wx:if="{{typeCounts[item.key] > 0}}">{{typeCounts[item.key]}}</text>
+    </view>
+  </view>
+
+  <!-- 顶部统计栏 -->
+  <view class="fav-header" wx:if="{{!loading && !error && !isEmpty}}">
+    <view class="fav-stat">
+      <text class="fav-stat-num">{{filteredList.length}}</text>
+      <text class="fav-stat-label">已收藏</text>
+    </view>
+    <view class="fav-actions">
+      <view wx:if="{{activeTab === 'all' || activeTab === 'question'}}"
+            class="fav-action-btn batch-btn" bindtap="goBatchPractice">批量练习</view>
+      <view class="fav-action-btn clear-btn" bindtap="clearAll">清空</view>
+    </view>
+  </view>
+
+  <!-- 筛选栏（仅当显示题目时） -->
+  <view class="filter-bar" wx:if="{{!loading && !error && !isEmpty && (activeTab === 'all' || activeTab === 'question') && typeCounts.question > 0}}">
+    <picker class="filter-picker" bindchange="onExamFilterChange" range="{{examOptions}}" range-key="label" value="{{examPickerIndex}}">
+      <view class="picker-value">{{examOptions[examPickerIndex].label}}</view>
+    </picker>
+    <picker class="filter-picker" bindchange="onQtypeFilterChange" range="{{qtypeOptions}}" range-key="label" value="{{qtypePickerIndex}}">
+      <view class="picker-value">{{qtypeOptions[qtypePickerIndex].label}}</view>
+    </picker>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="state-box">
+    <view class="state-text">加载中...</view>
+  </view>
+
+  <!-- 错误 -->
+  <view wx:if="{{error}}" class="state-box">
+    <view class="state-text error">{{error}}</view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{!loading && !error && isEmpty}}" class="state-box empty-state">
+    <view class="empty-icon">&#10084;</view>
+    <view class="empty-title">暂无收藏内容</view>
+    <view class="empty-desc">在答题、阅读文章或浏览知识库时点击收藏按钮，将内容加入收藏列表</view>
+    <view class="empty-btn" bindtap="goHome">去逛逛</view>
+  </view>
+
+  <!-- 筛选后无结果 -->
+  <view wx:if="{{!loading && !error && !isEmpty && filteredList.length === 0}}" class="state-box">
+    <view class="state-text">当前筛选条件下无收藏内容</view>
+  </view>
+
+  <!-- 收藏列表 -->
+  <view wx:if="{{!loading && !error && !isEmpty && filteredList.length > 0}}" class="fav-list">
+    <view wx:for="{{filteredList}}" wx:key="_id" class="fav-card">
+      <!-- 题目卡片 -->
+      <block wx:if="{{item._favType === 'question'}}">
+        <view class="fav-card-top" bindtap="goDetail" data-id="{{item.questionId}}" data-type="question" data-questionid="{{item.questionId}}" data-examid="{{item.examid}}">
+          <view class="fav-tags">
+            <view class="fav-tag fav-tag-type">题目</view>
+            <view class="fav-tag fav-tag-qtype">{{item.qtypeLabel}}</view>
+            <view class="fav-tag fav-tag-diff-{{item.difficulty || 0}}">{{item.diffLabel}}</view>
+          </view>
+          <view class="fav-title">{{item.questionTitle || '无题目标题'}}</view>
+          <view class="fav-time">收藏于 {{item.createTime || '未知时间'}}</view>
+        </view>
+        <view class="fav-card-actions">
+          <view class="fav-act practice-act" bindtap="goPractice" data-questionid="{{item.questionId}}" data-examid="{{item.examid}}">练习</view>
+          <view class="fav-act remove-act" bindtap="removeFavorite" data-favid="{{item._id}}" data-type="question">取消收藏</view>
+        </view>
+      </block>
+
+      <!-- 文章卡片 -->
+      <block wx:elif="{{item._favType === 'article'}}">
+        <view class="fav-card-top" bindtap="goDetail" data-id="{{item.articleId}}" data-type="article">
+          <view class="fav-tags">
+            <view class="fav-tag fav-tag-article">文章</view>
+          </view>
+          <view class="fav-title">{{item.articleTitle || '无标题'}}</view>
+          <view class="fav-summary" wx:if="{{item.articleSummary}}">{{item.articleSummary}}</view>
+          <view class="fav-meta-row">
+            <text class="fav-author" wx:if="{{item.articleAuthor}}">{{item.articleAuthor}}</text>
+            <text class="fav-time">收藏于 {{item.createTime || '未知时间'}}</text>
+          </view>
+        </view>
+        <view class="fav-card-actions">
+          <view class="fav-act read-act" bindtap="goDetail" data-id="{{item.articleId}}" data-type="article">阅读</view>
+          <view class="fav-act remove-act" bindtap="removeFavorite" data-favid="{{item._id}}" data-type="article">取消收藏</view>
+        </view>
+      </block>
+
+      <!-- 知识库卡片 -->
+      <block wx:elif="{{item._favType === 'knowledge'}}">
+        <view class="fav-card-top" bindtap="goDetail" data-id="{{item.docId}}" data-type="knowledge">
+          <view class="fav-tags">
+            <view class="fav-tag fav-tag-knowledge">知识库</view>
+            <view class="fav-tag fav-tag-doctype" wx:if="{{item.docTypeLabel}}">{{item.docTypeLabel}}</view>
+          </view>
+          <view class="fav-title">{{item.docTitle || '无标题'}}</view>
+          <view class="fav-time">收藏于 {{item.createTime || '未知时间'}}</view>
+        </view>
+        <view class="fav-card-actions">
+          <view class="fav-act read-act" bindtap="goDetail" data-id="{{item.docId}}" data-type="knowledge">阅读</view>
+          <view class="fav-act remove-act" bindtap="removeFavorite" data-favid="{{item._id}}" data-type="knowledge">取消收藏</view>
+        </view>
+      </block>
+    </view>
+  </view>
+</view>

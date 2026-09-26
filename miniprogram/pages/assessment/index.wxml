@@ -1,0 +1,104 @@
+<view class="assess-page">
+  <view class="assess-header">
+    <view class="header-title">自我测评配置</view>
+    <view class="header-desc">自定义范围、难度、题型，诊断薄弱环节</view>
+  </view>
+
+  <view class="config-card">
+    <picker mode="selector" range="{{examList}}" range-key="name" value="{{examPickerIndex}}" bindchange="onExamChange">
+      <view class="config-row">
+        <text class="config-label">考试科目</text>
+        <text class="config-value">{{selectedExamName || '请选择'}}</text>
+        <text class="config-arrow">></text>
+      </view>
+    </picker>
+  </view>
+
+  <view class="config-card">
+    <view class="config-row config-row-head">
+      <text class="config-label">题目范围</text>
+    </view>
+    <view class="scope-tags">
+      <view class="scope-tag {{scope === 'all' ? 'active' : ''}}" bindtap="selectScope" data-scope="all">全部章节</view>
+      <view class="scope-tag {{scope === 'chapters' ? 'active' : ''}}" bindtap="selectScope" data-scope="chapters">指定章节</view>
+      <view class="scope-tag {{scope === 'knowledgepoints' ? 'active' : ''}}" bindtap="selectScope" data-scope="knowledgepoints">指定知识点</view>
+    </view>
+
+    <view class="chapter-list" wx:if="{{scope === 'chapters'}}">
+      <view class="chapter-item {{selectedChapterIds.indexOf(item._id) > -1 ? 'checked' : ''}}"
+        wx:for="{{chapterList}}" wx:key="_id"
+        bindtap="toggleChapter" data-chid="{{item._id}}">
+        <view class="check-box">{{selectedChapterIds.indexOf(item._id) > -1 ? 'v' : ''}}</view>
+        <text>{{item.name}}</text>
+      </view>
+    </view>
+
+    <view class="kp-list" wx:if="{{scope === 'knowledgepoints'}}">
+      <view class="kp-item {{selectedKpIds.indexOf(item._id) > -1 ? 'checked' : ''}}"
+        wx:for="{{kpList}}" wx:key="_id"
+        bindtap="toggleKp" data-kpid="{{item._id}}">
+        <view class="check-box">{{selectedKpIds.indexOf(item._id) > -1 ? 'v' : ''}}</view>
+        <text>{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="config-card">
+    <picker mode="selector" range="{{countOptions}}" value="{{countIndex}}" bindchange="onCountChange">
+      <view class="config-row">
+        <text class="config-label">题目数量</text>
+        <text class="config-value">{{questionCount}} 题</text>
+        <text class="config-arrow">></text>
+      </view>
+    </picker>
+
+    <view class="config-row">
+      <text class="config-label">难度范围</text>
+    </view>
+    <view class="tag-group">
+      <view class="tag {{item.selected ? 'active' : ''}}" wx:for="{{difficultyOptions}}" wx:key="value"
+        bindtap="toggleDifficulty" data-val="{{item.value}}">{{item.label}}</view>
+    </view>
+
+    <view class="config-row">
+      <text class="config-label">题型选择</text>
+    </view>
+    <view class="tag-group">
+      <view class="tag {{item.selected ? 'active' : ''}}" wx:for="{{qtypes}}" wx:key="value"
+        bindtap="toggleQtype" data-val="{{item.value}}">{{item.label}}</view>
+    </view>
+  </view>
+
+  <view class="config-card">
+    <picker mode="selector" range="{{timeLabels}}" value="{{timeIndex}}" bindchange="onTimeChange">
+      <view class="config-row">
+        <text class="config-label">答题时长</text>
+        <text class="config-value">{{timeLabels[timeIndex]}}</text>
+        <text class="config-arrow">></text>
+      </view>
+    </picker>
+
+    <view class="config-row">
+      <text class="config-label">反馈模式</text>
+    </view>
+    <view class="tag-group">
+      <view class="tag {{feedbackMode === 'unified' ? 'active' : ''}}" bindtap="selectFeedback" data-mode="unified">统一交卷</view>
+      <view class="tag {{feedbackMode === 'instant' ? 'active' : ''}}" bindtap="selectFeedback" data-mode="instant">逐题反馈</view>
+    </view>
+
+    <view class="config-row" bindtap="toggleRandom">
+      <text class="config-label">随机顺序</text>
+      <switch checked="{{randomOrder}}" bindchange="toggleRandom" color="#4A90F3" />
+    </view>
+  </view>
+
+  <view class="estimate-bar">
+    <text class="estimate-text">预计可抽取 </text>
+    <text class="estimate-num">{{estimatedCount}}</text>
+    <text class="estimate-text"> 题</text>
+  </view>
+
+  <view class="start-btn {{starting ? 'disabled' : ''}}" bindtap="startAssessment">
+    <text>{{starting ? '抽题中...' : '开始测评'}}</text>
+  </view>
+</view>

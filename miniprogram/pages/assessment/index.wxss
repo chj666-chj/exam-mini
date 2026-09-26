@@ -1,0 +1,64 @@
+.assess-page { min-height: 100vh; background: #F6F6F6; padding-bottom: 160rpx; }
+
+.assess-header {
+  background: linear-gradient(135deg, #4A90F3 0%, #5BA0F5 100%);
+  padding: 30rpx 30rpx 40rpx;
+}
+.header-title { font-size: 36rpx; color: #fff; font-weight: 600; }
+.header-desc { font-size: 24rpx; color: rgba(255,255,255,0.8); margin-top: 8rpx; }
+
+.config-card {
+  background: #fff; margin: 20rpx 24rpx 0; border-radius: 16rpx;
+  padding: 24rpx 28rpx; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+.config-row {
+  display: flex; align-items: center; padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+.config-row:last-child { border-bottom: none; }
+.config-row-head { font-weight: 500; }
+.config-label { font-size: 28rpx; color: #333; }
+.config-value { flex: 1; text-align: right; font-size: 28rpx; color: #666; margin-right: 12rpx; }
+.config-arrow { font-size: 24rpx; color: #ccc; }
+
+.scope-tags { display: flex; gap: 16rpx; padding: 16rpx 0; }
+.scope-tag {
+  flex: 1; display: flex; align-items: center; justify-content: center; padding: 16rpx 0;
+  border-radius: 10rpx; font-size: 26rpx; background: #F0F0F0; color: #666;
+}
+.scope-tag.active { background: #4A90F3; color: #fff; }
+
+.chapter-list, .kp-list { padding: 12rpx 0; max-height: 400rpx; overflow-y: auto; }
+.chapter-item, .kp-item {
+  display: flex; align-items: center; padding: 16rpx 0;
+  font-size: 26rpx; color: #666;
+}
+.check-box {
+  width: 36rpx; height: 36rpx; border: 2rpx solid #ccc; border-radius: 8rpx;
+  margin-right: 16rpx; display: flex; align-items: center; justify-content: center;
+  font-size: 24rpx; color: #fff; flex-shrink: 0;
+}
+.chapter-item.checked .check-box, .kp-item.checked .check-box {
+  background: #4A90F3; border-color: #4A90F3;
+}
+
+.tag-group { display: flex; gap: 16rpx; padding: 12rpx 0 20rpx; flex-wrap: wrap; }
+.tag {
+  padding: 12rpx 32rpx; border-radius: 8rpx; font-size: 26rpx;
+  background: #F0F0F0; color: #666;
+}
+.tag.active { background: #E8F0FE; color: #4A90F3; border: 1rpx solid #4A90F3; }
+
+.estimate-bar {
+  text-align: center; padding: 30rpx 0 16rpx;
+}
+.estimate-text { font-size: 26rpx; color: #999; }
+.estimate-num { font-size: 36rpx; font-weight: 600; color: #4A90F3; }
+
+.start-btn {
+  margin: 20rpx 48rpx 0; padding: 28rpx 0;
+  display: flex; align-items: center; justify-content: center;
+  background: #4A90F3; color: #fff; font-size: 32rpx; font-weight: 500;
+  border-radius: 48rpx; box-shadow: 0 8rpx 24rpx rgba(74,144,243,0.3);
+}
+.start-btn.disabled { opacity: 0.6; }

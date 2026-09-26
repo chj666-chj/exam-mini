@@ -1,0 +1,73 @@
+<view class="page-entry">
+  <view class="subject-card">
+    <view class="subject-name">{{subjectName}}</view>
+    <view class="subject-meta" wx:if="{{!loading && !error}}">共 {{questionCount}} 题</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="state-box">
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <view wx:if="{{error}}" class="state-box">
+    <view class="error-text">{{error}}</view>
+    <view class="retry-btn" bindtap="onLoad" data-id="{{subjectId}}">重试</view>
+  </view>
+
+  <view wx:if="{{!loading && !error}}">
+    <view wx:if="{{questionCount === 0}}" class="state-box">
+      <view class="empty-text">该科目暂无题目</view>
+    </view>
+
+    <view wx:if="{{questionCount > 0}}">
+      <view class="section">
+        <view class="section-title">选择模式</view>
+        <view class="mode-grid">
+          <view class="mode-card {{mode === 'answer' ? 'active' : ''}}" bindtap="selectMode" data-mode="answer">
+            <view class="mode-badge answer-badge">答</view>
+            <view class="mode-info">
+              <view class="mode-name">答题模式</view>
+              <view class="mode-desc">作答后查看成绩</view>
+            </view>
+          </view>
+          <view class="mode-card {{mode === 'memorize' ? 'active' : ''}}" bindtap="selectMode" data-mode="memorize">
+            <view class="mode-badge memorize-badge">背</view>
+            <view class="mode-info">
+              <view class="mode-name">背题模式</view>
+              <view class="mode-desc">直接展示答案</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="section">
+        <view class="section-title">答题方式</view>
+        <view class="tag-row">
+          <view class="tag {{display === 'single' ? 'tag-active' : ''}}" bindtap="selectDisplay" data-display="single">单题模式</view>
+          <view class="tag {{display === 'list' ? 'tag-active' : ''}}" bindtap="selectDisplay" data-display="list">列表模式</view>
+        </view>
+      </view>
+
+      <view wx:if="{{qtypes.length > 1}}" class="section">
+        <view class="section-title">题型筛选</view>
+        <view class="tag-row">
+          <view class="tag {{qtypeFilter === '' ? 'tag-active' : ''}}" bindtap="selectQtype" data-qtype="">全部</view>
+          <view wx:for="{{qtypes}}" wx:key="value" class="tag {{qtypeFilter === item.value ? 'tag-active' : ''}}" bindtap="selectQtype" data-qtype="{{item.value}}">{{item.label}}</view>
+        </view>
+      </view>
+
+      <view class="section">
+        <view class="section-title">答题顺序</view>
+        <view class="tag-row">
+          <view class="tag {{order === 'seq' ? 'tag-active' : ''}}" bindtap="selectOrder" data-order="seq">顺序</view>
+          <view class="tag {{order === 'random' ? 'tag-active' : ''}}" bindtap="selectOrder" data-order="random">随机</view>
+        </view>
+      </view>
+
+      <view class="btn-area">
+        <button class="btn-start" bindtap="startQuiz">
+          {{mode === 'memorize' ? '开始背题' : '开始答题'}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

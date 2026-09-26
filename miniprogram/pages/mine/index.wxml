@@ -1,0 +1,158 @@
+<view class="page-mine {{fontSizeClass}}">
+  <!-- 用户卡片 -->
+  <view class="user-card" bindtap="showUserDetail">
+    <image class="user-avatar" src="{{avatar || '/images/header.png'}}" mode="aspectFill" binderror="onAvatarError" />
+    <view class="user-info">
+      <view class="user-name">{{nickname}}</view>
+      <view class="user-id">ID: {{openidShort}}</view>
+    </view>
+    <view class="login-btn" wx:if="{{!isLoggedIn}}" catchtap="goLogin">点击登录</view>
+  </view>
+
+  <!-- 统计 -->
+  <view class="mine-stats">
+    <view class="mstat">
+      <view class="mstat-icon mstat-icon-blue">📝</view>
+      <view class="mstat-num">{{solvedCount}}</view>
+      <view class="mstat-label">做题数量</view>
+    </view>
+    <view class="mstat-divider"></view>
+    <view class="mstat">
+      <view class="mstat-icon mstat-icon-green">✓</view>
+      <view class="mstat-num">{{accuracy}}%</view>
+      <view class="mstat-label">正确率</view>
+    </view>
+    <view class="mstat-divider"></view>
+    <view class="mstat">
+      <view class="mstat-icon mstat-icon-orange">🔥</view>
+      <view class="mstat-num">{{persistDays}}</view>
+      <view class="mstat-label">坚持天数</view>
+    </view>
+  </view>
+
+  <!-- 答题设置 -->
+  <view class="settings-card">
+    <view class="settings-header">
+      <view class="settings-header-bar"></view>
+      <text class="settings-title">答题设置</text>
+    </view>
+    <view class="settings-row">
+      <view class="settings-row-left">
+        <view class="settings-row-icon settings-icon-blue">⚡</view>
+        <text class="settings-label">答对自动跳转</text>
+      </view>
+      <switch checked="{{settings.autoNext}}" bindchange="toggleAutoNextSetting" color="#4A90F3" />
+    </view>
+    <view class="settings-row">
+      <view class="settings-row-left">
+        <view class="settings-row-icon settings-icon-purple">Aa</view>
+        <text class="settings-label">字体大小</text>
+      </view>
+      <view class="font-size-group">
+        <view class="font-size-btn {{settings.fontSize === 'small' ? 'fs-active' : ''}}" data-size="small" bindtap="changeFontSize">小</view>
+        <view class="font-size-btn {{settings.fontSize === 'medium' ? 'fs-active' : ''}}" data-size="medium" bindtap="changeFontSize">标准</view>
+        <view class="font-size-btn {{settings.fontSize === 'large' ? 'fs-active' : ''}}" data-size="large" bindtap="changeFontSize">大</view>
+      </view>
+    </view>
+    <!-- 字体大小预览 -->
+    <view class="font-size-preview">
+      <text class="font-size-preview-text">预览：这是一道示例题目文本，可用于查看字体大小效果。</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-list">
+    <view class="menu-row" bindtap="goHistory">
+      <view class="menu-row-icon menu-icon-blue">📋</view>
+      <text class="menu-label">我的答题记录</text>
+      <view class="arraw">></view>
+    </view>
+    <view class="menu-row" bindtap="goWrong">
+      <view class="menu-row-icon menu-icon-red">📕</view>
+      <text class="menu-label">我的错题</text>
+      <view class="arraw">></view>
+    </view>
+    <view class="menu-row" bindtap="goRank">
+      <view class="menu-row-icon menu-icon-yellow">🏆</view>
+      <text class="menu-label">考试排行</text>
+      <view class="arraw">></view>
+    </view>
+    <view class="menu-row" bindtap="goStudy">
+      <view class="menu-row-icon menu-icon-green">📚</view>
+      <text class="menu-label">我的练习</text>
+      <view class="arraw">></view>
+    </view>
+    <view class="menu-row" bindtap="goAIConfig">
+      <view class="menu-row-icon menu-icon-teal">🤖</view>
+      <text class="menu-label">AI 配置</text>
+      <view class="arraw">></view>
+    </view>
+    <view class="menu-row" bindtap="goPay">
+      <view class="menu-row-icon menu-icon-purple">💎</view>
+      <text class="menu-label">激活码通道</text>
+      <view class="arraw">></view>
+    </view>
+    <view class="menu-row" bindtap="goAbout">
+      <view class="menu-row-icon menu-icon-teal">ℹ️</view>
+      <text class="menu-label">关于我们</text>
+      <view class="arraw">></view>
+    </view>
+    <view class="menu-row" bindtap="goRule">
+      <view class="menu-row-icon menu-icon-orange">📜</view>
+      <text class="menu-label">考试规则</text>
+      <view class="arraw">></view>
+    </view>
+  </view>
+
+  <!-- AI 助手 -->
+  <view class="settings-card ai-assistant-card">
+    <view class="settings-header">
+      <view class="settings-header-bar"></view>
+      <text class="settings-title">AI 助手</text>
+    </view>
+    <view class="menu-row" bindtap="goAIQA">
+      <view class="menu-row-icon menu-icon-teal">💬</view>
+      <text class="menu-label">知识库问答</text>
+      <view class="arraw">></view>
+    </view>
+    <view class="menu-row" bindtap="goAIReport">
+      <view class="menu-row-icon menu-icon-blue">📊</view>
+      <text class="menu-label">学习报告</text>
+      <view class="arraw">></view>
+    </view>
+    <view class="menu-row" bindtap="goAIService">
+      <view class="menu-row-icon menu-icon-green">🎧</view>
+      <text class="menu-label">智能客服</text>
+      <view class="arraw">></view>
+    </view>
+  </view>
+</view>
+
+<!-- 用户详情弹窗 -->
+<view wx:if="{{showDetail}}" class="detail-mask" bindtap="closeUserDetail">
+  <view class="detail-panel" catchtap="noop">
+    <image class="detail-avatar" src="{{avatar || '/images/header.png'}}" mode="aspectFill" binderror="onAvatarError" />
+    <view class="detail-name">{{nickname}}</view>
+    <view class="detail-id">ID: {{openidShort}}</view>
+    <view class="detail-stats">
+      <view class="detail-stat">
+        <text class="detail-stat-num">{{solvedCount}}</text>
+        <text class="detail-stat-label">做题数</text>
+      </view>
+      <view class="detail-stat-divider"></view>
+      <view class="detail-stat">
+        <text class="detail-stat-num">{{accuracy}}%</text>
+        <text class="detail-stat-label">正确率</text>
+      </view>
+      <view class="detail-stat-divider"></view>
+      <view class="detail-stat">
+        <text class="detail-stat-num">{{persistDays}}</text>
+        <text class="detail-stat-label">坚持天数</text>
+      </view>
+    </view>
+    <view class="detail-actions">
+      <view class="detail-btn detail-btn-secondary" bindtap="goHistory">答题记录</view>
+      <view class="detail-btn detail-btn-primary" bindtap="closeUserDetail">关闭</view>
+    </view>
+  </view>
+</view>

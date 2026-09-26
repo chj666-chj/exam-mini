@@ -1,0 +1,85 @@
+<view class="page-ai-report">
+  <!-- 类型 Tab -->
+  <view class="report-tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="report-tab {{activeTab === item.key ? 'report-tab-active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="switchTab"
+    >{{item.label}}</view>
+  </view>
+
+  <!-- 生成按钮 -->
+  <view class="gen-btn-area">
+    <view class="gen-btn {{generating ? 'gen-btn-disabled' : ''}}" bindtap="generateReport">
+      <text wx:if="{{!generating}}">📄 生成{{activeTabText}}</text>
+      <text wx:if="{{generating}}">正在生成中...</text>
+    </view>
+  </view>
+
+  <!-- 生成中：加载动画 + 思考过程展示 -->
+  <view wx:if="{{generating}}" class="generating-panel">
+    <view class="gen-loading">
+      <view class="gen-spinner"></view>
+      <text class="gen-loading-text">{{genStatusText}}</text>
+    </view>
+    <view wx:if="{{thinkingSteps.length > 0}}" class="thinking-area">
+      <view class="thinking-header">AI 思考过程</view>
+      <view class="thinking-steps">
+        <view wx:for="{{thinkingSteps}}" wx:key="idx" class="thinking-step">
+          <view class="thinking-dot {{index < thinkingSteps.length - 1 ? 'thinking-dot-done' : 'thinking-dot-active'}}"></view>
+          <text class="thinking-step-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载中（读取已有报告） -->
+  <view wx:if="{{loading && !generating}}" class="loading-state">
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{!loading && !report && !generating}}" class="empty-state">
+    <view class="empty-icon">📊</view>
+    <view class="empty-text">暂无{{activeTabText}}</view>
+    <view class="empty-hint">点击上方「生成{{activeTabText}}」，AI 将根据你的学习记录生成个性化分析</view>
+  </view>
+
+  <!-- 报告内容 -->
+  <block wx:if="{{report && !generating}}">
+    <!-- 报告摘要 -->
+    <view wx:if="{{report.summary}}" class="report-summary-card">
+      <view class="report-summary-label">报告摘要</view>
+      <text class="report-summary-text">{{report.summary}}</text>
+    </view>
+
+    <!-- 报告正文（Markdown 渲染） -->
+    <view class="report-card">
+      <view class="report-card-header">
+        <view class="report-card-title">{{activeTabText}}</view>
+        <view wx:if="{{generatedAt}}" class="report-card-time">{{generatedAt}}</view>
+      </view>
+      <rich-text class="report-md" nodes="{{reportNodes}}"></rich-text>
+    </view>
+
+    <!-- 亮点 -->
+    <view wx:if="{{highlights.length > 0}}" class="section-card">
+      <view class="section-title">亮点</view>
+      <view wx:for="{{highlights}}" wx:key="index" class="highlight-item">
+        <text class="highlight-icon">✨</text>
+        <text class="highlight-text">{{item}}</text>
+      </view>
+    </view>
+
+    <!-- 学习建议 -->
+    <view wx:if="{{suggestions.length > 0}}" class="section-card">
+      <view class="section-title">学习建议</view>
+      <view wx:for="{{suggestions}}" wx:key="index" class="suggestion-item">
+        <text class="suggestion-icon">💡</text>
+        <text class="suggestion-text">{{item}}</text>
+      </view>
+    </view>
+  </block>
+</view>

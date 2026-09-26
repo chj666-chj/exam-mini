@@ -1,0 +1,103 @@
+# ============================================================
+# 考试宝项目 .gitignore
+# ============================================================
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+sdist/
+wheels/
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# ---- Django ----
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+db.sqlite3-wal
+db.sqlite3-shm
+media/
+staticfiles/
+
+# ---- 环境变量与密钥 ----
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ---- Node.js ----
+node_modules/
+web-admin/node_modules/
+web-admin/dist/
+web-admin/dist-ssr/
+*.local
+
+# ---- 微信小程序 ----
+miniprogram/project.private.config.json
+
+# ---- 构建产物与输出 ----
+outputs/
+*.tar.gz
+*.zip
+*.rar
+
+# ---- 构建日志与测试输出 ----
+web-admin/build_*.txt
+web-admin/vite_*.txt
+web-admin/dev.err
+backend/test_output.txt
+backend/test_results.json
+
+# ---- IDE 与编辑器 ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# ---- 操作系统 ----
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ---- WorkBuddy 项目数据 ----
+.workbuddy/
+
+# ---- 临时文件 ----
+*.tmp
+*.temp
+*.bak
+*.bak-*
+*.orig
+*.sqlite3.bak*

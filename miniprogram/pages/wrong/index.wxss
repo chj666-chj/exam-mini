@@ -1,0 +1,134 @@
+.page-wrong {
+  min-height: 100vh;
+  background: #f0f2f5;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.empty {
+  text-align: center;
+  color: #999;
+  padding: 160rpx 0;
+  font-size: 28rpx;
+}
+.small-empty { padding: 100rpx 0; }
+
+.empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  opacity: 0.4;
+  margin-bottom: 24rpx;
+}
+
+/* 概览 */
+.wrong-summary {
+  background: linear-gradient(135deg, #6ba7f7, #4a90f3);
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  padding: 40rpx 0;
+  margin-bottom: 24rpx;
+}
+.summary-item {
+  flex: 1;
+  text-align: center;
+  color: #fff;
+}
+.summary-num {
+  font-size: 48rpx;
+  font-weight: 600;
+}
+.summary-label {
+  font-size: 24rpx;
+  opacity: 0.9;
+  margin-top: 6rpx;
+}
+.summary-divider {
+  width: 2rpx;
+  height: 70rpx;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* 科目筛选 */
+.exam-filter-bar {
+  margin-bottom: 20rpx;
+}
+.exam-filter-picker {
+  width: 100%;
+}
+.exam-filter-value {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 16rpx 24rpx;
+  font-size: 26rpx;
+  color: #333;
+  text-align: center;
+  border: 2rpx solid #e8eaed;
+}
+
+/* 筛选 tab */
+.filter-tabs {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+.filter-tab {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  background: #fff;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  color: #666;
+  border: 2rpx solid transparent;
+}
+.filter-tab.tab-active {
+  color: #4A90F3;
+  border-color: #4A90F3;
+  background: #e6f1fb;
+  font-weight: 500;
+}
+
+/* 场次列表 */
+.group-item {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.group-title {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+.group-meta {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+.group-resolved-hint {
+  color: #1bcfad;
+}
+.group-right {
+  display: flex;
+  align-items: center;
+}
+.redo-hint {
+  font-size: 26rpx;
+  color: #4A90F3;
+  margin-right: 10rpx;
+}
+.arraw {
+  color: #c0c4cc;
+  font-size: 28rpx;
+}
+
+/* 小屏适配 */
+@media (max-width: 320px) {
+  .summary-num { font-size: 40rpx; }
+  .filter-tab { font-size: 24rpx; padding: 14rpx 0; }
+  .group-title { font-size: 28rpx; }
+}

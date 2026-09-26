@@ -1,0 +1,76 @@
+<view class="page-kb-detail">
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="kb-detail-loading">
+    <text>加载中...</text>
+  </view>
+
+  <block wx:if="{{!loading && doc}}">
+    <!-- 文档头部 -->
+    <view class="kb-detail-header">
+      <view class="kb-detail-type-row">
+        <text class="kb-detail-type-icon">{{doc.typeIcon}}</text>
+        <view class="kb-detail-type-badge">{{doc.typeLabel}}</view>
+        <text wx:if="{{doc.category}}" class="kb-detail-category">{{doc.category}}</text>
+      </view>
+      <view class="kb-detail-title">{{doc.title}}</view>
+      <view class="kb-detail-meta">
+        <text wx:if="{{doc.pages > 0}}" class="kb-detail-pages">{{doc.pages}}页</text>
+        <text class="kb-detail-views">阅读 {{doc.views || 0}}</text>
+        <text wx:if="{{doc.createTime}}" class="kb-detail-time">{{doc.createTime}}</text>
+      </view>
+    </view>
+
+    <!-- 工具栏 -->
+    <view class="kb-detail-toolbar">
+      <view class="kb-toolbar-group">
+        <text class="kb-toolbar-label">字号</text>
+        <view class="kb-font-btns">
+          <view class="kb-font-btn {{fontSize === 'small' ? 'fb-active' : ''}}" data-size="small" bindtap="changeFontSize">小</view>
+          <view class="kb-font-btn {{fontSize === 'medium' ? 'fb-active' : ''}}" data-size="medium" bindtap="changeFontSize">中</view>
+          <view class="kb-font-btn {{fontSize === 'large' ? 'fb-active' : ''}}" data-size="large" bindtap="changeFontSize">大</view>
+        </view>
+      </view>
+      <view class="kb-toolbar-fav {{isFavorited ? 'fav-on' : ''}}" bindtap="toggleFavorite">
+        <text class="kb-fav-star">{{isFavorited ? '⭐' : '☆'}}</text>
+        <text class="kb-fav-text">{{isFavorited ? '已收藏' : '收藏'}}</text>
+      </view>
+    </view>
+
+    <!-- 摘要 -->
+    <view wx:if="{{doc.summary}}" class="kb-detail-summary">
+      <view class="kb-summary-bar"></view>
+      <text class="kb-summary-text">{{doc.summary}}</text>
+    </view>
+
+    <!-- 正文内容 -->
+    <view class="kb-detail-content {{fontSizeClass}}">
+      <view
+        wx:for="{{contentParagraphs}}"
+        wx:key="index"
+        id="kb-p-{{index}}"
+        class="kb-paragraph {{item.level === 1 ? 'p-h1' : ''}} {{item.level === 2 ? 'p-h2' : ''}} {{item.level === 3 ? 'p-h3' : ''}} {{item.level === 4 ? 'p-highlight' : ''}} {{item.level === 0 ? 'p-body' : ''}}"
+      >
+        {{item.text}}
+      </view>
+      <view wx:if="{{contentParagraphs.length === 0 && !doc.content}}" class="kb-no-content">
+        暂无正文内容
+      </view>
+    </view>
+
+    <!-- 底部操作栏 -->
+    <view class="kb-detail-bottom">
+      <view class="kb-bottom-fav {{isFavorited ? 'fav-on' : ''}}" bindtap="toggleFavorite">
+        <text class="kb-bottom-star">{{isFavorited ? '⭐' : '☆'}}</text>
+        <text>{{isFavorited ? '已收藏' : '收藏'}}</text>
+      </view>
+      <view class="kb-bottom-toc" bindtap="goToc">
+        <text class="kb-bottom-toc-icon">📑</text>
+        <text>目录</text>
+      </view>
+      <button class="kb-bottom-share" open-type="share">
+        <text class="kb-bottom-share-icon">📤</text>
+        <text>分享</text>
+      </button>
+    </view>
+  </block>
+</view>

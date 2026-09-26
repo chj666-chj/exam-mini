@@ -1,0 +1,109 @@
+<view class="page-rank">
+  <!-- 蓝色头部 -->
+  <view class="rank-header">
+    <view class="seg-pill">
+      <view class="seg {{tab === 'rank' ? 'seg-on' : ''}}" bindtap="switchTab" data-tab="rank">排行榜</view>
+      <view class="seg {{tab === 'mine' ? 'seg-on' : ''}}" bindtap="switchTab" data-tab="mine">我的成绩</view>
+    </view>
+
+    <!-- 我的成绩 大数字 -->
+    <view class="header-score" wx:if="{{tab === 'mine'}}">
+      <view class="score-num">{{latestScore}}</view>
+      <view class="score-label">我的成绩</view>
+    </view>
+    <view class="header-score" wx:else>
+      <view class="score-num">{{myRank}}</view>
+      <view class="score-label">我的排名</view>
+    </view>
+  </view>
+
+  <!-- ===== 我的成绩视图 ===== -->
+  <block wx:if="{{tab === 'mine'}}">
+    <view class="stats-card">
+      <view class="stats-grid">
+        <view class="cell">
+          <view class="cell-num">{{persistDays}}</view>
+          <view class="cell-label">坚持天数</view>
+        </view>
+        <view class="cell">
+          <view class="cell-num">{{passCount}}</view>
+          <view class="cell-label">及格次数</view>
+        </view>
+        <view class="cell">
+          <view class="cell-num">{{examCount}}</view>
+          <view class="cell-label">累计考试次数</view>
+        </view>
+        <view class="cell">
+          <view class="cell-num">{{predictScore}}</view>
+          <view class="cell-label">分数预测</view>
+        </view>
+        <view class="cell">
+          <view class="cell-num">{{solvedCount}}</view>
+          <view class="cell-label">做题数量</view>
+        </view>
+        <view class="cell">
+          <view class="cell-num">{{accuracy}}%</view>
+          <view class="cell-label">正确率</view>
+        </view>
+        <view class="cell">
+          <view class="cell-num">{{unsolvedCount}}</view>
+          <view class="cell-label">未做数量</view>
+        </view>
+        <view class="cell">
+          <view class="cell-num">{{persistRank}}</view>
+          <view class="cell-label">天数排名</view>
+        </view>
+        <view class="cell">
+          <view class="cell-num">{{accuracyRank}}</view>
+          <view class="cell-label">正确率排名</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 本周达标 -->
+    <view class="week-card">
+      <view class="week-top">
+        <view class="week-title">
+          <view class="week-main">本周达标 <text class="week-num">{{weekPass}}天</text></view>
+          <view class="week-sub">累计达标 {{totalPassDays}} 天</view>
+        </view>
+        <view class="week-legend">
+          <view class="legend-item"><view class="dot dot-on"></view><text>已达标</text></view>
+          <view class="legend-item"><view class="dot dot-off"></view><text>未达标</text></view>
+        </view>
+      </view>
+      <view class="week-line">
+        <block wx:for="{{weekDays}}" wx:key="key">
+          <view class="day-node">
+            <view class="node {{item.pass ? 'node-on' : 'node-off'}}"></view>
+            <view class="day-label">{{item.label}}</view>
+          </view>
+        </block>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 排行榜视图 ===== -->
+  <block wx:else>
+    <view class="board-card">
+      <view class="board-row head">
+        <view class="col-rank">排名</view>
+        <view class="col-user">用户</view>
+        <view class="col-num">做题数</view>
+        <view class="col-num">正确率</view>
+      </view>
+      <view class="board-row {{item.openid === myOpenid ? 'me' : ''}}"
+            wx:for="{{board}}" wx:key="openid">
+        <view class="col-rank">
+          <text class="rank-no {{index < 3 ? 'top' + (index + 1) : ''}}">{{index + 1}}</text>
+        </view>
+        <view class="col-user">
+          <image class="avatar" src="{{item.avatar}}" mode="aspectFill" />
+          <text class="nick">{{item.nickname}}</text>
+        </view>
+        <view class="col-num">{{item.solved}}</view>
+        <view class="col-num">{{item.acc}}%</view>
+      </view>
+    </view>
+  </block>
+</view>

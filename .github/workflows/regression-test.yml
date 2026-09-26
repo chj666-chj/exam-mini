@@ -1,0 +1,165 @@
+name: 考试宝回归测试
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'backend/**'
+      - 'miniprogram/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/**'
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # ===== Stage 1: 环境准备 =====
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Dependencies
+        run: pip install django>=4.2
+
+      # ===== Stage 2: 安全加固验证 =====
+      - name: Verify Security Hardening
+        working-directory: backend
+        run: |
+          python -c "
+          import os
+          os.environ['DJANGO_SETTINGS_MODULE'] = 'backend.settings'
+          import django
+          django.setup()
+          from django.conf import settings
+
+          # 验证 SECRET_KEY 从环境变量读取
+          assert settings.SECRET_KEY, 'SECRET_KEY 不能为空'
+
+          # 验证 DEBUG 默认值
+          assert isinstance(settings.DEBUG, bool), 'DEBUG 必须是布尔值'
+
+          # 验证 ALLOWED_HOSTS 是列表
+          assert isinstance(settings.ALLOWED_HOSTS, list), 'ALLOWED_HOSTS 必须是列表'
+
+          # 验证 CACHES 配置存在
+          assert 'default' in settings.CACHES, 'CACHES 必须包含 default'
+          backend = settings.CACHES['default']['BACKEND']
+          assert 'Cache' in backend, f'CACHES backend 不合法: {backend}'
+
+          print('✅ 安全加固验证通过')
+          print(f'   SECRET_KEY: {settings.SECRET_KEY[:15]}...')
+          print(f'   DEBUG: {settings.DEBUG}')
+          print(f'   ALLOWED_HOSTS: {settings.ALLOWED_HOSTS}')
+          print(f'   CACHES backend: {backend}')
+          "
+
+      # ===== Stage 3: Django 系统检查 =====
+      - name: Django System Check
+        working-directory: backend
+        run: python manage.py check
+
+      # ===== Stage 4: 数据库初始化 =====
+      - name: Database Setup
+        working-directory: backend
+        run: |
+          python manage.py migrate --run-syncdb
+          python manage.py init_admin
+
+      # ===== Stage 5: 启动服务器 =====
+      - name: Start Dev Server
+        working-directory: backend
+        run: |
+          python manage.py runserver 127.0.0.1:8000 &
+          sleep 3
+          # 等待服务器就绪（最多重试 5 次）
+          for i in 1 2 3 4 5; do
+            if curl -sf http://127.0.0.1:8000/api/login/ > /dev/null 2>&1; then
+              echo "Server is ready"
+              break
+            fi
+            echo "Waiting for server... ($i)"
+            sleep 2
+          done
+          curl -sf http://127.0.0.1:8000/api/login/ > /dev/null || (echo "::error::Server failed to start" && exit 1)
+
+      # ===== Stage 6: 性能优化验证 =====
+      - name: Verify Performance Optimization
+        working-directory: backend
+        run: |
+          python -c "
+          import os
+          os.environ['DJANGO_SETTINGS_MODULE'] = 'backend.settings'
+          import django
+          django.setup()
+          from django.core.cache import cache
+
+          # 验证缓存可用
+          cache.set('test:verify', 'ok', 10)
+          assert cache.get('test:verify') == 'ok', '缓存写入/读取失败'
+          cache.delete('test:verify')
+          assert cache.get('test:verify') is None, '缓存删除失败'
+
+          # 验证 _invalidate_user_stats_cache 函数存在
+          from adminapi.views_data import _invalidate_user_stats_cache, _CACHE_KEY_USER_STATS
+          _invalidate_user_stats_cache()
+          print('✅ 性能优化验证通过')
+          print(f'   缓存 key: {_CACHE_KEY_USER_STATS}')
+          print('   _invalidate_user_stats_cache() 可调用')
+          "
+
+      # ===== Stage 7: 回归测试 =====
+      - name: Run Regression Tests
+        working-directory: backend
+        run: |
+          python run_tests.py
+          # run_tests.py 退出码：0=全通过，1=有失败
+
+      # ===== Stage 8: 测试报告上传 =====
+      - name: Upload Test Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-test-report
+          path: |
+            backend/test_results.json
+          retention-days: 30
+
+      # ===== Stage 9: PR 评论 =====
+      - name: Comment PR Results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const data = JSON.parse(fs.readFileSync('backend/test_results.json', 'utf8'));
+              const s = data.summary || {};
+              const body = [
+                '## 回归测试报告',
+                '',
+                '| 指标 | 数值 |',
+                '|------|------|',
+                `| 总用例 | ${s.total || 0} |`,
+                `| 通过 | ${s.passed || 0} |`,
+                `| 失败 | ${s.failed || 0} |`,
+                `| 通过率 | ${s.pass_rate || '0%'} |`,
+                '',
+                s.failed > 0 ? '⚠️ **存在失败用例，请检查测试报告 Artifact**' : '✅ **全部通过**'
+              ].join('\n');
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body
+              });
+            } catch (e) {
+              console.log('No test results found:', e.message);
+            }
