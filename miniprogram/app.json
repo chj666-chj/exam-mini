@@ -32,6 +32,7 @@
     "pages/examsetup/index",
     "pages/knowledgepoint/index",
     "pages/assessment/index",
+    "pages/typepractice/index",
     "pages/wrong/index",
     "pages/knowledge/detail",
     "pages/knowledge/toc",

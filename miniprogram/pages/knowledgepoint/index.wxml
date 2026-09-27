@@ -37,7 +37,15 @@
 
   <view class="kp-tree" wx:if="{{!loading && treeData.length > 0}}">
     <block wx:for="{{treeData}}" wx:key="_id" wx:for-item="kp1">
-      <view class="kp-node kp-level1" bindtap="toggleExpand" data-kpid="{{kp1._id}}">
+      <!-- 叶子级 level-1 知识点：直接可点击练习 -->
+      <view wx:if="{{kp1.isLeaf}}" class="kp-node kp-level1 kp-leaf" bindtap="onKpTap" data-kpid="{{kp1._id}}" data-kpname="{{kp1.name}}" data-qcount="{{kp1.questionCount}}" data-subjectid="{{kp1.subjectId}}" data-masterylabel="{{kp1.masteryLabel}}" data-isweak="false">
+        <view class="kp-dot" style="background:{{kp1.masteryColor}}"></view>
+        <text class="kp-name">{{kp1.name}}</text>
+        <text class="kp-count">{{kp1.questionCount}}题</text>
+        <text class="kp-mastery-tag" style="color:{{kp1.masteryColor}}">{{kp1.masteryLabel}}</text>
+      </view>
+      <!-- 非 叶子级 level-1 知识点：可展开/收起 -->
+      <view wx:else class="kp-node kp-level1" bindtap="toggleExpand" data-kpid="{{kp1._id}}">
         <view class="kp-expand-icon">{{expandedKeys[kp1._id] ? 'v' : '>'}}</view>
         <text class="kp-name">{{kp1.name}}</text>
         <text class="kp-count">{{kp1.questionCount}}题</text>

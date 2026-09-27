@@ -1,0 +1,73 @@
+.tp-page { min-height: 100vh; background: #F6F6F6; }
+
+/* ===== 头部（与 entry 页面风格一致） ===== */
+.tp-header {
+  background: linear-gradient(135deg, #4A90F3 0%, #5BA0F5 100%);
+  padding: 40rpx 30rpx;
+  color: #fff;
+}
+.tp-header-name { font-size: 36rpx; font-weight: 600; }
+.tp-header-sub { font-size: 26rpx; opacity: 0.85; margin-top: 10rpx; }
+
+/* ===== 加载/错误 ===== */
+.tp-loading, .tp-error {
+  text-align: center; padding: 120rpx 0; color: #999; font-size: 28rpx;
+}
+.tp-error-text { display: block; margin-bottom: 24rpx; }
+.tp-retry-btn { display: inline-block; padding: 16rpx 48rpx; background: #4A90F3; color: #fff; border-radius: 12rpx; font-size: 26rpx; }
+
+/* ===== 题型 Tab 栏 ===== */
+.tp-tabs {
+  white-space: nowrap; padding: 20rpx 24rpx 12rpx;
+  background: #fff; border-bottom: 1rpx solid #f0f0f0;
+}
+.tp-tab {
+  display: inline-flex; flex-direction: column; align-items: center;
+  padding: 16rpx 28rpx 16rpx; margin-right: 16rpx;
+  border-radius: 16rpx 16rpx 0 0; border-bottom: 6rpx solid transparent;
+  transition: all 0.2s;
+}
+.tp-tab-active { background: #FAFAFA; }
+.tp-tab-icon {
+  width: 56rpx; height: 56rpx; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28rpx; font-weight: 600; margin-bottom: 8rpx;
+}
+.tp-tab-label { font-size: 24rpx; color: #333; font-weight: 500; }
+.tp-tab-count { font-size: 20rpx; color: #999; margin-top: 4rpx; }
+
+/* ===== 统计卡片 ===== */
+.tp-detail { padding: 0 24rpx 40rpx; }
+.tp-stats-card {
+  background: #fff; border-radius: 16rpx; margin-top: 20rpx;
+  padding: 28rpx 24rpx; border-top: 6rpx solid #4A90F3;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+.tp-stats-row { display: flex; align-items: center; }
+.tp-stat-item { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.tp-stat-num { font-size: 44rpx; font-weight: 600; color: #333; line-height: 1.2; }
+.tp-stat-blue { color: #4A90F3; }
+.tp-stat-green { color: #1D9E75; }
+.tp-stat-red { color: #E24B4A; }
+.tp-stat-label { font-size: 22rpx; color: #999; margin-top: 8rpx; }
+.tp-stat-divider { width: 1rpx; height: 60rpx; background: #f0f0f0; }
+
+/* ===== 进度条 ===== */
+.tp-progress-section { margin-top: 28rpx; }
+.tp-progress-bar { height: 12rpx; background: #F0F0F0; border-radius: 6rpx; overflow: hidden; }
+.tp-progress-fill { height: 100%; border-radius: 6rpx; transition: width 0.3s; }
+.tp-progress-text { font-size: 22rpx; color: #999; margin-top: 10rpx; display: block; }
+
+/* ===== 正确率 ===== */
+.tp-accuracy { margin-top: 20rpx; display: flex; align-items: baseline; }
+.tp-accuracy-label { font-size: 24rpx; color: #999; margin-right: 16rpx; }
+.tp-accuracy-value { font-size: 36rpx; font-weight: 600; }
+
+/* ===== 操作按钮 ===== */
+.tp-actions { display: flex; gap: 20rpx; margin-top: 24rpx; }
+.tp-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 24rpx 0; border-radius: 12rpx; font-size: 28rpx; font-weight: 500;
+}
+.tp-btn-primary { color: #fff; }
+.tp-btn-secondary { background: #fff; border: 2rpx solid #4A90F3; }

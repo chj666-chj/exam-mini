@@ -41,6 +41,7 @@
 }
 .kp-level1 { font-weight: 500; }
 .kp-level2 { padding-left: 60rpx; background: #FAFAFA; }
+.kp-leaf { border-left: 6rpx solid #4A90F3; }
 .kp-expand-icon { width: 40rpx; font-size: 24rpx; color: #999; text-align: center; }
 .kp-dot { width: 16rpx; height: 16rpx; border-radius: 50%; margin-right: 16rpx; flex-shrink: 0; }
 .kp-name { flex: 1; font-size: 28rpx; color: #333; }

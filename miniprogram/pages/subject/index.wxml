@@ -19,6 +19,7 @@
       class="subject-item"
       bindtap="toEntryPage"
       data-id="{{item._id}}"
+      data-name="{{item.name}}"
     >
       <view class="subject-num">{{index + 1}}</view>
       <view class="subject-name">{{item.name}}</view>

@@ -45,8 +45,9 @@ Page({
       return;
     }
 
+    // subjectId 是章节 _id（如 RK_RJJS_CH01），题目中对应字段为 chapter（非 examid）
     var db = api.database();
-    db.collection('questions').where({ examid: that.data.subjectId }).get({
+    db.collection('questions').where({ chapter: that.data.subjectId }).get({
       success: function (res) {
         var list = (res.data || []).map(function (q) {
           if (typeof q.options === 'string') {

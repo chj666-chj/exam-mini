@@ -97,10 +97,12 @@ Page({
     });
   },
 
-  loadQuestions: function (examid) {
+  loadQuestions: function (chapterId) {
+    // 传入的是章节 _id（如 RK_RJJS_CH01），题目数据中对应字段为 chapter（非 examid）。
+    // examid 存的是考试级 id（如 RK_RJJS），用 examid 查章节 id 会返回空。
     var that = this;
     var db = api.database();
-    db.collection('questions').where({ examid: examid }).get({
+    db.collection('questions').where({ chapter: chapterId }).get({
       success: function (res) {
         var questions = (res.data || []).map(function (q) {
           if (typeof q.options === 'string') {

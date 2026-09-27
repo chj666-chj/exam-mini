@@ -95,10 +95,12 @@ Page({
           children.sort(function (a, b) { return (a.sortWeight || 0) - (b.sortWeight || 0); });
           var masteryLevel = that.getMasteryLabel(kp1.masteryCache);
           var hasWeakChild = false;
+          var isLeaf = children.length === 0;
           return {
             _id: kp1._id,
             name: kp1.name,
             level: 1,
+            isLeaf: isLeaf,
             questionCount: kp1.questionCount || 0,
             children: children.map(function (kp2) {
               var m2 = that.getMasteryLabel(kp2.masteryCache);
@@ -121,6 +123,7 @@ Page({
             masteryLabel: masteryLevel.label,
             masteryColor: masteryLevel.color,
             subjectId: kp1.subjectId,
+            masteryCache: kp1.masteryCache || null,
             hasWeakChild: hasWeakChild
           };
         });
@@ -138,11 +141,18 @@ Page({
         var practicedKp = 0;
         var weakKp = 0;
         treeData.forEach(function (kp1) {
-          totalKp += kp1.children.length;
-          kp1.children.forEach(function (kp2) {
-            if (kp2.masteryLevel === 'weak') weakKp++;
-            if (kp2.masteryLevel !== 'none') practicedKp++;
-          });
+          if (kp1.isLeaf) {
+            // 叶子级 level-1 知识点直接计入统计
+            totalKp++;
+            if (kp1.masteryLevel === 'weak') weakKp++;
+            if (kp1.masteryLevel !== 'none') practicedKp++;
+          } else {
+            totalKp += kp1.children.length;
+            kp1.children.forEach(function (kp2) {
+              if (kp2.masteryLevel === 'weak') weakKp++;
+              if (kp2.masteryLevel !== 'none') practicedKp++;
+            });
+          }
         });
 
         that.setData({
@@ -194,9 +204,10 @@ Page({
     var masteryLabel = e.currentTarget.dataset.masterylabel;
     var isWeak = e.currentTarget.dataset.isweak === 'true' || e.currentTarget.dataset.isweak === true;
 
-    // 从 treeData 中找到对应知识点获取 masteryCache
+    // 从 treeData 中找到对应知识点获取 masteryCache（兼容 level 1 叶子节点和 level 2 子节点）
     var masteryCache = null;
     this.data.treeData.forEach(function (kp1) {
+      if (kp1._id === kpId) masteryCache = kp1.masteryCache;
       kp1.children.forEach(function (kp2) {
         if (kp2._id === kpId) masteryCache = kp2.masteryCache;
       });

@@ -1,0 +1,91 @@
+<view class="tp-page">
+  <!-- 头部（与 entry 页面风格一致） -->
+  <view class="tp-header">
+    <view class="tp-header-name">{{subjectName}}</view>
+    <view class="tp-header-sub">题型专项练习</view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="tp-loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 错误 -->
+  <view class="tp-error" wx:if="{{!loading && error}}">
+    <text class="tp-error-text">{{error}}</text>
+    <view class="tp-retry-btn" bindtap="goBack">返回</view>
+  </view>
+
+  <!-- 主体内容 -->
+  <block wx:if="{{!loading && !error}}">
+    <!-- 题型 Tab 栏（横向滚动） -->
+    <scroll-view class="tp-tabs" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
+      <view
+        wx:for="{{typeGroups}}"
+        wx:key="qtype"
+        class="tp-tab {{activeType === item.qtype ? 'tp-tab-active' : ''}}"
+        bindtap="onTypeTap"
+        data-qtype="{{item.qtype}}"
+        style="border-color:{{activeType === item.qtype ? item.color : 'transparent'}}"
+      >
+        <view class="tp-tab-icon" style="background:{{item.bg}};color:{{item.color}}">{{item.icon}}</view>
+        <text class="tp-tab-label">{{item.label}}</text>
+        <text class="tp-tab-count">{{item.total}}题</text>
+      </view>
+    </scroll-view>
+
+    <!-- 当前题型详情 -->
+    <block wx:for="{{typeGroups}}" wx:key="qtype" wx:for-item="group">
+      <view wx:if="{{activeType === group.qtype}}" class="tp-detail">
+        <!-- 统计卡片 -->
+        <view class="tp-stats-card" style="border-top-color:{{group.color}}">
+          <view class="tp-stats-row">
+            <view class="tp-stat-item">
+              <text class="tp-stat-num">{{group.total}}</text>
+              <text class="tp-stat-label">总题数</text>
+            </view>
+            <view class="tp-stat-divider"></view>
+            <view class="tp-stat-item">
+              <text class="tp-stat-num tp-stat-blue">{{group.answered}}</text>
+              <text class="tp-stat-label">已练习</text>
+            </view>
+            <view class="tp-stat-divider"></view>
+            <view class="tp-stat-item">
+              <text class="tp-stat-num tp-stat-green">{{group.correct}}</text>
+              <text class="tp-stat-label">答对</text>
+            </view>
+            <view class="tp-stat-divider"></view>
+            <view class="tp-stat-item">
+              <text class="tp-stat-num tp-stat-red">{{group.wrong}}</text>
+              <text class="tp-stat-label">答错</text>
+            </view>
+          </view>
+
+          <!-- 进度条 -->
+          <view class="tp-progress-section">
+            <view class="tp-progress-bar">
+              <view class="tp-progress-fill" style="width:{{group.progress}}%;background:{{group.color}}"></view>
+            </view>
+            <text class="tp-progress-text">练习进度 {{group.progress}}%</text>
+          </view>
+
+          <!-- 正确率 -->
+          <view class="tp-accuracy" wx:if="{{group.answered > 0}}">
+            <text class="tp-accuracy-label">正确率</text>
+            <text class="tp-accuracy-value" style="color:{{group.correctRate >= 60 ? group.color : '#E24B4A'}}">{{group.correctRate}}%</text>
+          </view>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="tp-actions">
+          <view class="tp-btn tp-btn-primary" bindtap="startPractice" data-qtype="{{group.qtype}}" style="background:{{group.color}}">
+            <text>开始{{group.label}}练习</text>
+          </view>
+          <view class="tp-btn tp-btn-secondary" bindtap="startMemorize" data-qtype="{{group.qtype}}" style="color:{{group.color}};border-color:{{group.color}}">
+            <text>背题浏览</text>
+          </view>
+        </view>
+      </view>
+    </block>
+  </block>
+</view>

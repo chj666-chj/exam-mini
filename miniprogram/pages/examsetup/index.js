@@ -87,7 +87,8 @@ Page({
       return;
     }
     subjects.forEach(function (subj) {
-      db.collection('questions').where({ examid: subj._id }).get({
+      // subj._id 是章节 _id，题目中对应字段为 chapter（非 examid）
+      db.collection('questions').where({ chapter: subj._id }).get({
         success: function (res) {
           total += (res.data || []).length;
           loaded++;
@@ -170,7 +171,8 @@ Page({
     var loaded = 0;
 
     subjects.forEach(function (subj) {
-      db.collection('questions').where({ examid: subj._id }).get({
+      // subj._id 是章节 _id，题目中对应字段为 chapter（非 examid）
+      db.collection('questions').where({ chapter: subj._id }).get({
         success: function (res) {
           (res.data || []).forEach(function (q) {
             if (typeof q.options === 'string') {
@@ -198,7 +200,8 @@ Page({
   loadSingleSubjectQuestions: function (subject) {
     var that = this;
     var db = api.database();
-    db.collection('questions').where({ examid: subject._id }).get({
+    // subject._id 是章节 _id，题目中对应字段为 chapter（非 examid）
+    db.collection('questions').where({ chapter: subject._id }).get({
       success: function (res) {
         var questions = (res.data || []).map(function (q) {
           if (typeof q.options === 'string') {

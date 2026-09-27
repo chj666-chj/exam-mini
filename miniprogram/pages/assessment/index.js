@@ -196,7 +196,8 @@ Page({
           var loaded = 0;
           if (subjects.length === 0) { that.setData({ estimatedCount: 0 }); return; }
           subjects.forEach(function (subj) {
-            db.collection('questions').where({ examid: subj._id }).get({
+            // subj._id 是章节 _id，题目中对应字段为 chapter（非 examid）
+            db.collection('questions').where({ chapter: subj._id }).get({
               success: function (r) {
                 total += (r.data || []).length;
                 loaded++;
@@ -217,7 +218,8 @@ Page({
       var loaded = 0;
       if (chapterIds.length === 0) { this.setData({ estimatedCount: 0 }); return; }
       chapterIds.forEach(function (chId) {
-        db.collection('questions').where({ examid: chId }).get({
+        // chId 是章节 _id，题目中对应字段为 chapter（非 examid）
+        db.collection('questions').where({ chapter: chId }).get({
           success: function (r) {
             total += (r.data || []).length;
             loaded++;
@@ -346,7 +348,7 @@ Page({
     var seenIds = {};
     sources.forEach(function (src) {
       var query = src.type === 'chapter'
-        ? { examid: src.id }
+        ? { chapter: src.id }
         : { knowledgePointIds__contains: src.id };
 
       db.collection('questions').where(query).get({

@@ -57,6 +57,7 @@ Page({
 
   toEntryPage: function (e) {
     var id = e.currentTarget.dataset.id;
+    var name = e.currentTarget.dataset.name || '';
     if (!id) {
       wx.showToast({ icon: 'none', title: '科目ID异常' });
       return;
@@ -68,7 +69,7 @@ Page({
     } else if (mode === 'shuffle') {
       wx.navigateTo({ url: '/pages/entry/index?id=' + id + '&order=random' });
     } else if (mode === 'type') {
-      wx.navigateTo({ url: '/pages/entry/index?id=' + id });
+      wx.navigateTo({ url: '/pages/typepractice/index?id=' + id + '&name=' + encodeURIComponent(name) });
     } else if (mode === 'order') {
       wx.navigateTo({ url: '/pages/entry/index?id=' + id });
     } else {

@@ -177,21 +177,34 @@ Page({
     }
 
     var db = api.database();
-    db.collection('questions').where({ examid: that.data.subjectId }).get({
-      success: function (res) {
-        var list = (res.data || []).map(function (q) {
-          if (typeof q.options === 'string') {
-            try { q.options = JSON.parse(q.options); } catch (e) { q.options = []; }
-          }
-          q.options = q.options || [];
-          q.qtype = q.qtype || q.type || 'single';
-          return q;
-        });
-        if (list.length === 0) {
-          that.setData({ loading: false, error: '该科目暂无题目' });
-          return;
+    // subjectId 可能是章节 _id（如 RK_RJJS_CH01，来自 entry）或考试 _id（如 RK_RJJS，来自 examsetup/assessment）。
+    // 题目数据中 chapter 存章节 id、examid 存考试 id，先按 chapter 查，空则回退 examid 查。
+    function handleQuestions(res) {
+      var list = (res.data || []).map(function (q) {
+        if (typeof q.options === 'string') {
+          try { q.options = JSON.parse(q.options); } catch (e) { q.options = []; }
         }
-        that.initQuestions(list);
+        q.options = q.options || [];
+        q.qtype = q.qtype || q.type || 'single';
+        return q;
+      });
+      if (list.length === 0) {
+        that.setData({ loading: false, error: '该科目暂无题目' });
+        return;
+      }
+      that.initQuestions(list);
+    }
+    db.collection('questions').where({ chapter: that.data.subjectId }).get({
+      success: function (res) {
+        if ((res.data || []).length > 0) { handleQuestions(res); return; }
+        // chapter 查询为空，回退用 examid 查（subjectId 可能是考试级 id）
+        db.collection('questions').where({ examid: that.data.subjectId }).get({
+          success: handleQuestions,
+          fail: function (err) {
+            console.error('[exam] loadQuestions fallback fail', err);
+            that.setData({ loading: false, error: '题目加载失败，请检查网络' });
+          }
+        });
       },
       fail: function (err) {
         console.error('[exam] loadQuestions fail', err);
