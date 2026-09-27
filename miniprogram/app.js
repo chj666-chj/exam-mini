@@ -5,16 +5,24 @@ App({
   onLaunch: function () {
     this.globalData = {};
 
-    // 登录：从 Django 后端获取 openid（本地开发返回演示账号，
-    // 该账号在数据库中有答题记录，便于查看「答题记录/错题本」演示数据）
+    // 游客模式自动登录：仅在本地无 openid 时触发（首次启动）。
+    // 如果用户已主动退出登录（openid 已清除），此处会重新以游客身份登录；
+    // 如果用户已通过账号登录（openid 存在），则跳过，不覆盖已有登录态。
+    var existingOpenid = wx.getStorageSync('openid') || '';
+    if (existingOpenid) {
+      console.log('[app] 已有登录态，跳过自动登录, openid:', existingOpenid);
+      this.globalData.openid = existingOpenid;
+      return;
+    }
+
     api.callFunction({
       name: 'login',
       data: {},
       success: function (res) {
-        console.log('[login] 成功: ', res.result)
+        console.log('[app] 游客自动登录成功: ', res.result)
       },
       fail: function (err) {
-        console.error('[login] 失败，请确认 Django 后端已启动: http://127.0.0.1:8000', err)
+        console.error('[app] 游客自动登录失败，请确认 Django 后端已启动: http://127.0.0.1:8000', err)
       }
     })
   }

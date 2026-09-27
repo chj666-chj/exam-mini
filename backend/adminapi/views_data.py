@@ -12,6 +12,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.core.cache import cache
 from django.utils import timezone
+import re
 
 from core.models import Document
 from . import article_code
@@ -648,6 +649,11 @@ def _user_stats():
             'gender': du.to_number(info.get('gender'), 0) if isinstance(info, dict) else 0,
             'status': data.get('status') or USER_STATUS_ACTIVE,
             'remark': data.get('remark') or '',
+            # account 字段：账号注册的用户有此字段（用户名），游客模式注册的没有
+            'account': du.to_text(data.get('account')) or '',
+            'email': du.to_text(data.get('email')) or '',
+            'phone': du.to_text(data.get('phone')) or '',
+            'address': du.to_text(data.get('address')) or '',
         }
 
     # 2. notes —— 数据库 count 聚合（按 _openid 分组）
@@ -693,6 +699,10 @@ def _user_stats():
             'gender': p.get('gender') or 0,
             'status': p.get('status') or USER_STATUS_ACTIVE,
             'remark': p.get('remark') or '',
+            'account': p.get('account') or '',
+            'email': p.get('email') or '',
+            'phone': p.get('phone') or '',
+            'address': p.get('address') or '',
             'has_profile': openid in profiles,
             'records': s.get('records', 0),
             'notes': s.get('notes', 0) or notes_agg.get(openid, 0),
@@ -719,7 +729,9 @@ def user_list(request):
     items = _user_stats()
     if keyword:
         items = [x for x in items
-                 if keyword in x['openid'].lower() or keyword in x['nickname'].lower()]
+                 if keyword in x['openid'].lower()
+                 or keyword in x['nickname'].lower()
+                 or keyword in (x.get('account') or '').lower()]
     if status:
         items = [x for x in items if x['status'] == status]
     total = len(items)
@@ -795,7 +807,7 @@ def user_dispatch(request, openid):
 
 
 def user_update(request, openid):
-    """PUT/PATCH /api/admin/users/<openid>/  {nickname, status, remark}"""
+    """PUT/PATCH /api/admin/users/<openid>/  {nickname, status, remark, email, phone, address}"""
     if request.method not in ('PUT', 'PATCH'):
         return fail(ErrorCode.PARAM_ERROR, '请使用 PUT 或 PATCH 提交', http_status=405)
     body, err = perm.json_body(request)
@@ -817,6 +829,19 @@ def user_update(request, openid):
         data['status'] = status
     if 'remark' in body:
         data['remark'] = du.to_text(body.get('remark'))
+    # 新增字段：邮箱、手机号、地址
+    if 'email' in body:
+        email = du.to_text(body.get('email'))
+        if email and not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+            return fail(ErrorCode.PARAM_ERROR, '邮箱格式不正确')
+        data['email'] = email
+    if 'phone' in body:
+        phone = du.to_text(body.get('phone'))
+        if phone and not re.match(r'^1[3-9]\d{9}$', phone):
+            return fail(ErrorCode.PARAM_ERROR, '手机号格式不正确（需 11 位数字）')
+        data['phone'] = phone
+    if 'address' in body:
+        data['address'] = du.to_text(body.get('address'))
 
     if doc:
         doc.data = data
@@ -825,11 +850,56 @@ def user_update(request, openid):
         doc = Document.objects.create(collection='profiles', doc_id=None, data=data)
     perm.log_action(
         request.admin_user, 'user.update', target=openid,
-        detail=str({k: body[k] for k in ('nickname', 'status', 'remark') if k in body}),
+        detail=str({k: body[k] for k in ('nickname', 'status', 'remark', 'email', 'phone', 'address') if k in body}),
         ip=perm.client_ip(request),
     )
     _invalidate_user_stats_cache()
     return ok({'_id': doc.doc_id or str(doc.pk)}, '保存成功')
+
+
+@perm.require_perms('user.manage', methods=['POST'])
+def user_reset_password(request, openid):
+    """POST /api/admin/users/<openid>/reset-password/
+
+    管理员一键重置用户密码：
+      1. 生成 8 位随机临时密码（字母+数字）
+      2. PBKDF2 哈希后存入 profiles
+      3. 标记 forceResetPassword=True（用户首次登录后强制改密）
+      4. 返回临时密码（管理员手动通知用户）
+
+    返回：{ code: 0, data: { tempPassword: "Ab3xY9nK" }, message: "密码已重置" }
+    """
+    import random as _rand
+    import string as _str
+    from django.contrib.auth.hashers import make_password
+
+    if request.method != 'POST':
+        return fail(ErrorCode.PARAM_ERROR, '请使用 POST 提交', http_status=405)
+
+    doc = Document.objects.filter(collection='profiles', data___openid=openid).first()
+    if not doc:
+        return fail(ErrorCode.NOT_FOUND, '用户不存在')
+
+    # 生成临时密码：8 位，含大小写字母+数字
+    chars = _str.ascii_letters + _str.digits
+    temp_pwd = ''.join(_rand.choices(chars, k=8))
+
+    data = dict(doc.data) if doc.data else {}
+    data['password'] = make_password(temp_pwd)
+    data['forceResetPassword'] = True
+    data['passwordResetAt'] = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    doc.data = data
+    doc.save(update_fields=['data'])
+
+    # 记录操作日志
+    perm.log_action(
+        request.admin_user, 'user.reset_password', target=openid,
+        detail='管理员重置用户密码',
+        ip=perm.client_ip(request),
+    )
+
+    return ok({'tempPassword': temp_pwd}, '密码已重置，临时密码已生成，请通知用户')
 
 
 def user_delete(request, openid):

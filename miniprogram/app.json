@@ -40,7 +40,10 @@
     "pages/ai-profile/index",
     "pages/ai-qa/index",
     "pages/ai-report/index",
-    "pages/ai-service/index"
+    "pages/ai-service/index",
+    "pages/profile-edit/index",
+    "pages/change-password/index",
+    "pages/forgot-password/index"
   ],
   "window": {
     "backgroundColor": "#F6F6F6",

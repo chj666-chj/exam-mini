@@ -163,6 +163,7 @@ urlpatterns = [
     # ---- 小程序用户 ----
     path('users/', views_data.user_list, name='admin-user-list'),
     path('users/<str:openid>/profile/', views_profile.user_profile, name='admin-user-profile'),
+    path('users/<str:openid>/reset-password/', views_data.user_reset_password, name='admin-user-reset-password'),
     path('users/<str:openid>/', views_data.user_dispatch, name='admin-user-detail'),
 
     # ---- 原始数据浏览 ----

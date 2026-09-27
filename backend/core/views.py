@@ -2,6 +2,8 @@
 
 接口一览（均返回 JSON，均为 csrf_exempt，仅限本地开发）：
 - POST /api/login/                       -> {"openid": "..."}       模拟云函数 login
+- POST /api/register/                    -> {"openid","nickname"}   账号注册（用户名+密码）
+- POST /api/account-login/               -> {"openid","nickname"}   账号登录（用户名+密码）
 - GET  /api/collections/<name>/          -> {"data": [...]}         集合查询（支持 ?字段=值 过滤、?count=1 计数）
 - GET  /api/collections/<name>/<id>/     -> {"data": {...}}         按 _id 取文档
 - POST /api/collections/<name>/          -> {"_id": "..."}           新增文档（data 带 _id 时为 upsert）
@@ -13,9 +15,11 @@ import json
 import random
 import re
 import time
+import uuid
 
 from django.db import IntegrityError, OperationalError
 from django.db.models import Count, Q
+from django.contrib.auth.hashers import make_password, check_password
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
@@ -225,6 +229,577 @@ def login(request):
     if top and top.get('data___openid'):
         openid = top['data___openid']
     return JsonResponse({'openid': openid})
+
+
+# ---------------------------------------------------------------- 账号注册 / 账号登录
+# 小程序端用户体系基于 openid（模拟微信云开发），profiles 集合存储用户档案。
+# 账号注册/登录在 profiles 中增加 account + password 字段（Django PBKDF2 哈希），
+# 注册时生成唯一 _openid（USER_<时间戳>_<随机>），登录时校验密码后返回该 openid。
+
+
+def _validate_account(username):
+    """校验用户名：3-20 位，仅允许字母/数字/下划线。返回 (ok, message)。"""
+    if not username:
+        return False, '用户名不能为空'
+    if len(username) < 3 or len(username) > 20:
+        return False, '用户名长度需 3-20 位'
+    if not re.match(r'^[a-zA-Z0-9_]+$', username):
+        return False, '用户名仅支持字母、数字和下划线'
+    return True, ''
+
+
+def _validate_password(password):
+    """校验密码：6-32 位。返回 (ok, message)。"""
+    if not password:
+        return False, '密码不能为空'
+    if len(password) < 6 or len(password) > 32:
+        return False, '密码长度需 6-32 位'
+    return True, ''
+
+
+@csrf_exempt
+def register(request):
+    """POST /api/register/  账号注册。
+
+    请求体：{ "username": str, "password": str, "nickname": str? }
+    流程：
+      1. 校验 username（3-20 位字母/数字/下划线）、password（6-32 位）、nickname（可选，默认取 username）
+      2. 检查 username 在 profiles 集合中是否已存在（account 字段）
+      3. 生成唯一 _openid = USER_<时间戳>_<6位随机>
+      4. 创建 profiles 文档：account / password(PBKDF2 哈希) / userInfo / status / createdAt
+      5. 返回 { openid, nickname }
+
+    返回信封：{ code: 0, message: "注册成功", data: { openid, nickname } }
+    """
+    if request.method != 'POST':
+        return JsonResponse({'code': 40001, 'message': '方法不支持'}, status=405)
+
+    try:
+        body = json.loads(request.body) if request.body else {}
+    except (ValueError, TypeError):
+        return JsonResponse({'code': 40001, 'message': '请求体格式错误'}, status=400)
+
+    username = str(body.get('username', '')).strip()
+    password = str(body.get('password', ''))
+    nickname = str(body.get('nickname', '')).strip() or username
+
+    # 字段校验
+    ok, msg = _validate_account(username)
+    if not ok:
+        return JsonResponse({'code': 40001, 'message': msg}, status=400)
+    ok, msg = _validate_password(password)
+    if not ok:
+        return JsonResponse({'code': 40001, 'message': msg}, status=400)
+    if len(nickname) > 20:
+        return JsonResponse({'code': 40001, 'message': '昵称长度不能超过 20 位'}, status=400)
+
+    # 检查用户名是否已被注册
+    existing = Document.objects.filter(
+        collection='profiles', data__account=username
+    ).first()
+    if existing:
+        return JsonResponse({'code': 40901, 'message': '该用户名已被注册，请更换'}, status=409)
+
+    # 生成唯一 openid
+    openid = 'USER_' + str(int(time.time())) + '_' + uuid.uuid4().hex[:6]
+    now_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M:%S')
+
+    profile_data = {
+        '_openid': openid,
+        'account': username,
+        'password': make_password(password),
+        'userInfo': {
+            'nickName': nickname,
+            'avatarUrl': '',
+        },
+        'status': 'active',
+        'vip': False,
+        'isVip': False,
+        'roles': ['user'],
+        'createdAt': now_str,
+    }
+
+    doc_id = 'PROFILE_' + openid
+
+    def _do_register():
+        return _upsert_document('profiles', doc_id, profile_data)
+
+    try:
+        _db_write_with_retry(_do_register)
+    except (IntegrityError, OperationalError) as exc:
+        return JsonResponse(
+            {'code': 50001, 'message': f'注册失败，请稍后重试：{str(exc)}'}, status=500
+        )
+
+    # 清除用户统计缓存（与管理端使用同一缓存失效函数，确保 key 一致）
+    try:
+        from adminapi.views_data import _invalidate_user_stats_cache
+        _invalidate_user_stats_cache()
+    except ImportError:
+        from django.core.cache import cache
+        cache.delete('admin:user_stats:all')
+
+    return JsonResponse({
+        'code': 0,
+        'message': '注册成功',
+        'data': {
+            'openid': openid,
+            'nickname': nickname,
+        }
+    })
+
+
+@csrf_exempt
+def account_login(request):
+    """POST /api/account-login/  账号登录（用户名 + 密码）。
+
+    请求体：{ "username": str, "password": str }
+    流程：
+      1. 校验字段非空
+      2. 在 profiles 集合中按 account 查找用户
+      3. 校验密码（PBKDF2 check_password）
+      4. 校验账号状态（disabled → 拒绝）
+      5. 返回 { openid, nickname, avatarUrl }
+
+    返回信封：{ code: 0, message: "登录成功", data: { openid, nickname, avatarUrl } }
+    """
+    if request.method != 'POST':
+        return JsonResponse({'code': 40001, 'message': '方法不支持'}, status=405)
+
+    try:
+        body = json.loads(request.body) if request.body else {}
+    except (ValueError, TypeError):
+        return JsonResponse({'code': 40001, 'message': '请求体格式错误'}, status=400)
+
+    username = str(body.get('username', '')).strip()
+    password = str(body.get('password', ''))
+
+    if not username or not password:
+        return JsonResponse({'code': 40001, 'message': '用户名和密码不能为空'}, status=400)
+
+    profile_doc = Document.objects.filter(
+        collection='profiles', data__account=username
+    ).first()
+
+    if not profile_doc:
+        return JsonResponse({'code': 40101, 'message': '用户名或密码错误'}, status=401)
+
+    profile_data = profile_doc.data or {}
+    stored_hash = profile_data.get('password', '')
+
+    if not stored_hash or not check_password(password, stored_hash):
+        return JsonResponse({'code': 40101, 'message': '用户名或密码错误'}, status=401)
+
+    # 校验账号状态
+    if profile_data.get('status') == 'disabled':
+        return JsonResponse({'code': 40301, 'message': '该账号已被停用，请联系管理员'}, status=403)
+
+    openid = profile_data.get('_openid', '')
+    if not openid:
+        return JsonResponse({'code': 50001, 'message': '账号数据异常，缺少 openid'}, status=500)
+
+    user_info = profile_data.get('userInfo', {}) or {}
+    nickname = user_info.get('nickName', username)
+    avatar_url = user_info.get('avatarUrl', '')
+
+    # 检查是否需要强制改密码（管理员重置后标记）
+    force_reset = bool(profile_data.get('forceResetPassword', False))
+
+    return JsonResponse({
+        'code': 0,
+        'message': '登录成功',
+        'data': {
+            'openid': openid,
+            'nickname': nickname,
+            'avatarUrl': avatar_url,
+            'forceResetPassword': force_reset,
+        }
+    })
+
+
+# ---------------------------------------------------------------- 用户资料 & 密码管理
+# 小程序端接口：
+#   POST /api/profile/update/          更新个人资料（昵称/头像/邮箱/手机号/地址）
+#   GET  /api/profile/                 获取个人资料
+#   POST /api/change-password/         修改密码（原密码 + 新密码）
+#   POST /api/forgot-password/         忘记密码（发送验证码到邮箱/手机号）
+#   POST /api/reset-password/          重置密码（验证码 + 新密码）
+
+# 验证码缓存 key 前缀（使用 Django cache 后端）
+_RESET_CODE_KEY = 'pwd_reset_code:{account}'
+_RESET_CODE_TTL = 300  # 5 分钟有效
+
+# 邮箱 / 手机号正则
+_EMAIL_RE = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+_PHONE_RE = re.compile(r'^1[3-9]\d{9}$')
+
+# 密码强度：至少 6 位，包含字母和数字（与注册校验保持一致但增强）
+_PWD_RE = re.compile(r'^(?=.*[a-zA-Z])(?=.*\d).{6,32}$')
+
+
+def _check_password_strength(password):
+    """检查密码强度：6-32 位，必须包含字母和数字。返回 (ok, message)。"""
+    if not password:
+        return False, '密码不能为空'
+    if len(password) < 6 or len(password) > 32:
+        return False, '密码长度需 6-32 位'
+    if not _PWD_RE.match(password):
+        return False, '密码需包含字母和数字'
+    return True, ''
+
+
+@csrf_exempt
+def profile_update(request):
+    """POST /api/profile/update/  更新个人资料。
+
+    请求头：X-Openid: <openid>
+    请求体：{ nickname?, avatarUrl?, email?, phone?, address? }（只更新传入的字段）
+
+    返回信封：{ code: 0, message: "保存成功", data: { ...更新后的资料 } }
+    """
+    if request.method != 'POST':
+        return JsonResponse({'code': 40001, 'message': '方法不支持'}, status=405)
+
+    openid = request.headers.get('X-Openid') or ''
+    if not openid:
+        return JsonResponse({'code': 40101, 'message': '未登录，请先登录'}, status=401)
+
+    try:
+        body = json.loads(request.body) if request.body else {}
+    except (ValueError, TypeError):
+        return JsonResponse({'code': 40001, 'message': '请求体格式错误'}, status=400)
+
+    # 查找用户 profile
+    profile_doc = Document.objects.filter(
+        collection='profiles', data___openid=openid
+    ).first()
+    if not profile_doc:
+        return JsonResponse({'code': 40401, 'message': '用户资料不存在'}, status=404)
+
+    data = dict(profile_doc.data) if profile_doc.data else {}
+    user_info = data.get('userInfo') or {}
+    if not isinstance(user_info, dict):
+        user_info = {}
+
+    changed = False
+
+    # 昵称
+    if 'nickname' in body:
+        nick = str(body.get('nickname', '')).strip()
+        if nick and len(nick) <= 20:
+            user_info['nickName'] = nick
+            changed = True
+        elif nick and len(nick) > 20:
+            return JsonResponse({'code': 40001, 'message': '昵称长度不能超过 20 位'}, status=400)
+
+    # 头像
+    if 'avatarUrl' in body:
+        avatar = str(body.get('avatarUrl', '')).strip()
+        user_info['avatarUrl'] = avatar
+        changed = True
+
+    # 邮箱
+    if 'email' in body:
+        email = str(body.get('email', '')).strip()
+        if email and not _EMAIL_RE.match(email):
+            return JsonResponse({'code': 40001, 'message': '邮箱格式不正确'}, status=400)
+        data['email'] = email
+        changed = True
+
+    # 手机号
+    if 'phone' in body:
+        phone = str(body.get('phone', '')).strip()
+        if phone and not _PHONE_RE.match(phone):
+            return JsonResponse({'code': 40001, 'message': '手机号格式不正确（需 11 位数字）'}, status=400)
+        data['phone'] = phone
+        changed = True
+
+    # 地址
+    if 'address' in body:
+        address = str(body.get('address', '')).strip()
+        if len(address) > 200:
+            return JsonResponse({'code': 40001, 'message': '地址长度不能超过 200 位'}, status=400)
+        data['address'] = address
+        changed = True
+
+    if not changed:
+        return JsonResponse({'code': 0, 'message': '无需要更新的字段', 'data': {}})
+
+    data['userInfo'] = user_info
+
+    def _do_save():
+        profile_doc.data = data
+        profile_doc.save(update_fields=['data'])
+
+    try:
+        _db_write_with_retry(_do_save)
+    except (IntegrityError, OperationalError) as exc:
+        return JsonResponse({'code': 50001, 'message': f'保存失败：{str(exc)}'}, status=500)
+
+    # 清除管理端用户统计缓存
+    try:
+        from adminapi.views_data import _invalidate_user_stats_cache
+        _invalidate_user_stats_cache()
+    except ImportError:
+        pass
+
+    return JsonResponse({
+        'code': 0,
+        'message': '保存成功',
+        'data': {
+            'nickname': user_info.get('nickName', ''),
+            'avatarUrl': user_info.get('avatarUrl', ''),
+            'email': data.get('email', ''),
+            'phone': data.get('phone', ''),
+            'address': data.get('address', ''),
+        }
+    })
+
+
+@csrf_exempt
+def profile_get(request):
+    """GET /api/profile/  获取个人资料。
+
+    请求头：X-Openid: <openid>
+    返回信封：{ code: 0, data: { nickname, avatarUrl, email, phone, address, account, createdAt } }
+    """
+    if request.method != 'GET':
+        return JsonResponse({'code': 40001, 'message': '方法不支持'}, status=405)
+
+    openid = request.headers.get('X-Openid') or ''
+    if not openid:
+        return JsonResponse({'code': 40101, 'message': '未登录，请先登录'}, status=401)
+
+    profile_doc = Document.objects.filter(
+        collection='profiles', data___openid=openid
+    ).first()
+    if not profile_doc:
+        return JsonResponse({'code': 40401, 'message': '用户资料不存在'}, status=404)
+
+    data = profile_doc.data or {}
+    user_info = data.get('userInfo') or {}
+
+    return JsonResponse({
+        'code': 0,
+        'data': {
+            'account': data.get('account', ''),
+            'nickname': user_info.get('nickName', ''),
+            'avatarUrl': user_info.get('avatarUrl', ''),
+            'email': data.get('email', ''),
+            'phone': data.get('phone', ''),
+            'address': data.get('address', ''),
+            'createdAt': data.get('createdAt', ''),
+        }
+    })
+
+
+@csrf_exempt
+def change_password(request):
+    """POST /api/change-password/  修改密码（需登录，验证原密码）。
+
+    请求头：X-Openid: <openid>
+    请求体：{ oldPassword, newPassword }
+
+    返回信封：{ code: 0, message: "密码修改成功" }
+    """
+    if request.method != 'POST':
+        return JsonResponse({'code': 40001, 'message': '方法不支持'}, status=405)
+
+    openid = request.headers.get('X-Openid') or ''
+    if not openid:
+        return JsonResponse({'code': 40101, 'message': '未登录，请先登录'}, status=401)
+
+    try:
+        body = json.loads(request.body) if request.body else {}
+    except (ValueError, TypeError):
+        return JsonResponse({'code': 40001, 'message': '请求体格式错误'}, status=400)
+
+    old_pwd = str(body.get('oldPassword', ''))
+    new_pwd = str(body.get('newPassword', ''))
+
+    if not old_pwd:
+        return JsonResponse({'code': 40001, 'message': '请输入原密码'}, status=400)
+
+    # 新密码强度校验
+    ok, msg = _check_password_strength(new_pwd)
+    if not ok:
+        return JsonResponse({'code': 40001, 'message': msg}, status=400)
+
+    profile_doc = Document.objects.filter(
+        collection='profiles', data___openid=openid
+    ).first()
+    if not profile_doc:
+        return JsonResponse({'code': 40401, 'message': '用户资料不存在'}, status=404)
+
+    data = dict(profile_doc.data) if profile_doc.data else {}
+    stored_hash = data.get('password', '')
+
+    # 游客模式注册的用户没有 password 字段 → 不允许通过此接口改密
+    if not stored_hash:
+        return JsonResponse({'code': 40301, 'message': '当前账号未设置密码（游客模式），无法修改密码'}, status=403)
+
+    if not check_password(old_pwd, stored_hash):
+        return JsonResponse({'code': 40101, 'message': '原密码不正确'}, status=401)
+
+    # 新密码不能与原密码相同
+    if check_password(new_pwd, stored_hash):
+        return JsonResponse({'code': 40001, 'message': '新密码不能与原密码相同'}, status=400)
+
+    # 更新密码
+    data['password'] = make_password(new_pwd)
+    # 清除"需强制改密码"标记
+    data.pop('forceResetPassword', None)
+
+    def _do_save():
+        profile_doc.data = data
+        profile_doc.save(update_fields=['data'])
+
+    try:
+        _db_write_with_retry(_do_save)
+    except (IntegrityError, OperationalError) as exc:
+        return JsonResponse({'code': 50001, 'message': f'密码修改失败：{str(exc)}'}, status=500)
+
+    return JsonResponse({'code': 0, 'message': '密码修改成功'})
+
+
+@csrf_exempt
+def forgot_password(request):
+    """POST /api/forgot-password/  忘记密码（发送验证码）。
+
+    请求体：{ account, channel: 'email'|'phone' }
+    流程：
+      1. 按 account（用户名）查找用户
+      2. 检查用户是否绑定了对应渠道（邮箱/手机号）
+      3. 生成 6 位数字验证码，存入 cache（5 分钟有效）
+      4. 发送验证码（开发环境直接返回验证码，生产环境发邮件/短信）
+
+    返回信封：{ code: 0, message: "验证码已发送", data: { devCode?: "123456" } }
+    """
+    from django.core.cache import cache
+
+    if request.method != 'POST':
+        return JsonResponse({'code': 40001, 'message': '方法不支持'}, status=405)
+
+    try:
+        body = json.loads(request.body) if request.body else {}
+    except (ValueError, TypeError):
+        return JsonResponse({'code': 40001, 'message': '请求体格式错误'}, status=400)
+
+    account = str(body.get('account', '')).strip()
+    channel = str(body.get('channel', 'email')).strip()
+
+    if not account:
+        return JsonResponse({'code': 40001, 'message': '请输入用户名'}, status=400)
+    if channel not in ('email', 'phone'):
+        return JsonResponse({'code': 40001, 'message': '渠道仅支持 email 或 phone'}, status=400)
+
+    # 查找用户
+    profile_doc = Document.objects.filter(
+        collection='profiles', data__account=account
+    ).first()
+    if not profile_doc:
+        # 安全考虑：不暴露用户名是否存在
+        return JsonResponse({'code': 0, 'message': '若该用户名存在，验证码已发送至绑定渠道'})
+
+    data = profile_doc.data or {}
+    target = ''
+    if channel == 'email':
+        target = data.get('email', '')
+        if not target:
+            return JsonResponse({'code': 40001, 'message': '该账号未绑定邮箱，无法通过邮箱找回密码'}, status=400)
+    else:
+        target = data.get('phone', '')
+        if not target:
+            return JsonResponse({'code': 40001, 'message': '该账号未绑定手机号，无法通过手机号找回密码'}, status=400)
+
+    # 生成 6 位验证码
+    code = str(random.randint(100000, 999999))
+    cache.set(_RESET_CODE_KEY.format(account=account), code, _RESET_CODE_TTL)
+
+    # 开发环境：直接返回验证码（生产环境应发邮件/短信）
+    # TODO: 生产环境接入邮件/短信服务
+    resp_data = {}
+    if getattr(settings, 'DEBUG', False):
+        resp_data['devCode'] = code
+        # 遮罩目标地址
+        if channel == 'email':
+            resp_data['target'] = target[:2] + '***' + target[target.index('@'):]
+        else:
+            resp_data['target'] = target[:3] + '****' + target[-4:]
+
+    return JsonResponse({
+        'code': 0,
+        'message': '验证码已发送' + ('（开发环境直接返回）' if getattr(settings, 'DEBUG', False) else ''),
+        'data': resp_data
+    })
+
+
+@csrf_exempt
+def reset_password(request):
+    """POST /api/reset-password/  重置密码（验证码 + 新密码）。
+
+    请求体：{ account, code, newPassword }
+    流程：
+      1. 校验验证码
+      2. 校验新密码强度
+      3. 更新密码，清除验证码缓存
+
+    返回信封：{ code: 0, message: "密码重置成功" }
+    """
+    from django.core.cache import cache
+
+    if request.method != 'POST':
+        return JsonResponse({'code': 40001, 'message': '方法不支持'}, status=405)
+
+    try:
+        body = json.loads(request.body) if request.body else {}
+    except (ValueError, TypeError):
+        return JsonResponse({'code': 40001, 'message': '请求体格式错误'}, status=400)
+
+    account = str(body.get('account', '')).strip()
+    code = str(body.get('code', '')).strip()
+    new_pwd = str(body.get('newPassword', ''))
+
+    if not account or not code:
+        return JsonResponse({'code': 40001, 'message': '用户名和验证码不能为空'}, status=400)
+
+    # 新密码强度校验
+    ok, msg = _check_password_strength(new_pwd)
+    if not ok:
+        return JsonResponse({'code': 40001, 'message': msg}, status=400)
+
+    # 校验验证码
+    cached_code = cache.get(_RESET_CODE_KEY.format(account=account))
+    if not cached_code:
+        return JsonResponse({'code': 40001, 'message': '验证码已过期或未发送，请重新获取'}, status=400)
+    if cached_code != code:
+        return JsonResponse({'code': 40101, 'message': '验证码不正确'}, status=401)
+
+    # 查找用户并更新密码
+    profile_doc = Document.objects.filter(
+        collection='profiles', data__account=account
+    ).first()
+    if not profile_doc:
+        return JsonResponse({'code': 40401, 'message': '用户不存在'}, status=404)
+
+    data = dict(profile_doc.data) if profile_doc.data else {}
+    data['password'] = make_password(new_pwd)
+    # 清除"需强制改密码"标记
+    data.pop('forceResetPassword', None)
+
+    def _do_save():
+        profile_doc.data = data
+        profile_doc.save(update_fields=['data'])
+
+    try:
+        _db_write_with_retry(_do_save)
+    except (IntegrityError, OperationalError) as exc:
+        return JsonResponse({'code': 50001, 'message': f'密码重置失败：{str(exc)}'}, status=500)
+
+    # 清除验证码
+    cache.delete(_RESET_CODE_KEY.format(account=account))
+
+    return JsonResponse({'code': 0, 'message': '密码重置成功，请使用新密码登录'})
 
 
 @csrf_exempt

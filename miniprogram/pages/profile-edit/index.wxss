@@ -1,0 +1,101 @@
+.pe-page {
+  min-height: 100vh;
+  background: var(--c-bg);
+  padding: 0 32rpx 60rpx;
+  box-sizing: border-box;
+}
+
+/* ===== 头像区 ===== */
+.pe-avatar-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48rpx 0 36rpx;
+}
+
+.pe-avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  border: 6rpx solid var(--c-primary-light);
+  background: #eee;
+}
+
+.pe-avatar-tip {
+  font-size: 24rpx;
+  color: var(--c-primary);
+  margin-top: 16rpx;
+}
+
+/* ===== 全局错误 ===== */
+.pe-global-error {
+  background: var(--c-danger-light);
+  border-radius: var(--r-sm);
+  padding: 16rpx 24rpx;
+  margin-bottom: 24rpx;
+  font-size: 26rpx;
+  color: var(--c-danger);
+}
+
+/* ===== 表单 ===== */
+.pe-form {
+  background: var(--c-bg-white);
+  border-radius: var(--r-lg);
+  padding: 12rpx 36rpx;
+  box-shadow: var(--shadow-sm);
+}
+
+.pe-field {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid var(--c-border-light);
+}
+
+.pe-field:last-child {
+  border-bottom: none;
+}
+
+.pe-field-error {
+  /* 视觉提示由下方错误文字承担 */
+}
+
+.pe-label {
+  width: 160rpx;
+  font-size: 28rpx;
+  color: var(--c-text-secondary);
+  flex-shrink: 0;
+}
+
+.pe-input {
+  flex: 1;
+  font-size: 30rpx;
+  color: var(--c-text);
+}
+
+.pe-error-msg {
+  font-size: 24rpx;
+  color: var(--c-danger);
+  padding: 4rpx 0 8rpx 160rpx;
+  border-bottom: 1rpx solid var(--c-border-light);
+}
+
+/* ===== 保存按钮 ===== */
+.pe-save-btn {
+  width: 100%;
+  height: 92rpx;
+  background: var(--c-primary);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 600;
+  border-radius: var(--r-md);
+  margin-top: 36rpx;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pe-save-btn[disabled] {
+  opacity: 0.6;
+}

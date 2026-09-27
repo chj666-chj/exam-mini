@@ -11,6 +11,14 @@ from adminapi.views_ai import (
 
 urlpatterns = [
     path('login/', views.login, name='login'),
+    path('register/', views.register, name='register'),
+    path('account-login/', views.account_login, name='account-login'),
+    # ---- 用户资料 & 密码管理 ----
+    path('profile/', views.profile_get, name='profile-get'),
+    path('profile/update/', views.profile_update, name='profile-update'),
+    path('change-password/', views.change_password, name='change-password'),
+    path('forgot-password/', views.forgot_password, name='forgot-password'),
+    path('reset-password/', views.reset_password, name='reset-password'),
     path('ai/assist/', ai_assist, name='ai-assist'),
     path('ai/review-plan/', review_plan, name='ai-review-plan-mp'),
     path('ai/learning-profile/', learning_profile, name='ai-learning-profile-mp'),

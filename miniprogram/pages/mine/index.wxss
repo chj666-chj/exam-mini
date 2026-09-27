@@ -4,7 +4,57 @@
   padding-bottom: 40rpx;
 }
 
-/* ===== 用户卡片 ===== */
+/* ===== 未登录引导卡片 ===== */
+.guest-card {
+  background: linear-gradient(160deg, #5b9bf5, var(--c-primary));
+  padding: 60rpx 40rpx 70rpx;
+  display: flex;
+  align-items: center;
+  gap: 26rpx;
+}
+
+.guest-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 6rpx solid rgba(255, 255, 255, 0.6);
+  background: #eee;
+  opacity: 0.85;
+}
+
+.guest-info {
+  color: #fff;
+  flex: 1;
+}
+
+.guest-title {
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.guest-desc {
+  font-size: 24rpx;
+  opacity: 0.8;
+  margin-top: 10rpx;
+  line-height: 1.5;
+}
+
+.guest-login-btn {
+  margin-left: auto;
+  background: #fff;
+  color: var(--c-primary);
+  font-size: 28rpx;
+  font-weight: 600;
+  padding: 16rpx 36rpx;
+  border-radius: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+}
+
+/* ===== 已登录用户卡片 ===== */
 .user-card {
   background: linear-gradient(160deg, #5b9bf5, var(--c-primary));
   padding: 60rpx 40rpx 70rpx;
@@ -34,19 +84,6 @@
   font-size: 24rpx;
   opacity: 0.85;
   margin-top: 10rpx;
-}
-
-.login-btn {
-  margin-left: auto;
-  background: rgba(255, 255, 255, 0.25);
-  color: #fff;
-  font-size: 26rpx;
-  padding: 10rpx 32rpx;
-  border-radius: 30rpx;
-  border: 2rpx solid rgba(255, 255, 255, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* ===== 统计卡片 ===== */
@@ -249,6 +286,11 @@
   margin-top: 24rpx;
 }
 
+/* ===== 账号管理 ===== */
+.account-card {
+  margin-top: 24rpx;
+}
+
 /* ===== 字体大小偏好（页面级） ===== */
 .fs-small .settings-label { font-size: 26rpx; }
 .fs-small .settings-title { font-size: 28rpx; }
@@ -389,5 +431,29 @@
 .detail-btn-primary {
   background: var(--c-primary);
   color: #fff;
+}
+
+/* ===== 退出登录 ===== */
+.logout-area {
+  margin: 32rpx 24rpx 0;
+}
+
+.logout-btn {
+  width: 100%;
+  height: 88rpx;
+  background: var(--c-bg-white);
+  color: var(--c-danger);
+  font-size: 30rpx;
+  font-weight: 500;
+  border-radius: var(--r-md);
+  border: 2rpx solid var(--c-danger-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.logout-btn::after {
+  border: none;
 }
 

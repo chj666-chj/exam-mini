@@ -1,12 +1,21 @@
 <view class="page-mine {{fontSizeClass}}">
-  <!-- 用户卡片 -->
-  <view class="user-card" bindtap="showUserDetail">
+  <!-- ===== 未登录状态：登录引导卡片 ===== -->
+  <view wx:if="{{!isLoggedIn}}" class="guest-card" bindtap="goLogin">
+    <image class="guest-avatar" src="/images/header.png" mode="aspectFill" />
+    <view class="guest-info">
+      <view class="guest-title">您还未登录</view>
+      <view class="guest-desc">登录后即可查看做题记录、错题本、学习报告等个性化内容</view>
+    </view>
+    <view class="guest-login-btn">立即登录</view>
+  </view>
+
+  <!-- ===== 已登录状态：用户信息卡片 ===== -->
+  <view wx:if="{{isLoggedIn}}" class="user-card" bindtap="showUserDetail">
     <image class="user-avatar" src="{{avatar || '/images/header.png'}}" mode="aspectFill" binderror="onAvatarError" />
     <view class="user-info">
       <view class="user-name">{{nickname}}</view>
       <view class="user-id">ID: {{openidShort}}</view>
     </view>
-    <view class="login-btn" wx:if="{{!isLoggedIn}}" catchtap="goLogin">点击登录</view>
   </view>
 
   <!-- 统计 -->
@@ -104,6 +113,24 @@
     </view>
   </view>
 
+  <!-- 账号管理（仅已登录时显示） -->
+  <view wx:if="{{isLoggedIn}}" class="settings-card account-card">
+    <view class="settings-header">
+      <view class="settings-header-bar"></view>
+      <text class="settings-title">账号管理</text>
+    </view>
+    <view class="menu-row" bindtap="goProfileEdit">
+      <view class="menu-row-icon menu-icon-blue">👤</view>
+      <text class="menu-label">编辑资料</text>
+      <view class="arraw">></view>
+    </view>
+    <view class="menu-row" bindtap="goChangePassword">
+      <view class="menu-row-icon menu-icon-orange">🔑</view>
+      <text class="menu-label">修改密码</text>
+      <view class="arraw">></view>
+    </view>
+  </view>
+
   <!-- AI 助手 -->
   <view class="settings-card ai-assistant-card">
     <view class="settings-header">
@@ -125,6 +152,11 @@
       <text class="menu-label">智能客服</text>
       <view class="arraw">></view>
     </view>
+  </view>
+
+  <!-- 退出登录（仅已登录时显示） -->
+  <view wx:if="{{isLoggedIn}}" class="logout-area">
+    <button class="logout-btn" bindtap="handleLogout">退出登录</button>
   </view>
 </view>
 

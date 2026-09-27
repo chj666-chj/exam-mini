@@ -128,6 +128,135 @@ function callFunction(options) {
 }
 
 /**
+ * 账号注册：POST /api/register/
+ * @param {Object} data - { username, password, nickname? }
+ * @returns {Promise} { openid, nickname }
+ */
+function register(data) {
+  return request('POST', '/register/', data || {}, { skipAuth: true }).then(function (res) {
+    if (res && typeof res === 'object' && 'code' in res) {
+      if (res.code === 0) {
+        return res.data || {};
+      }
+      throw { message: res.message || '注册失败', code: res.code };
+    }
+    return res;
+  });
+}
+
+/**
+ * 账号登录：POST /api/account-login/
+ * 登录成功后将 openid 写入本地缓存并同步到 app.globalData
+ * @param {Object} data - { username, password }
+ * @returns {Promise} { openid, nickname, avatarUrl }
+ */
+function accountLogin(data) {
+  return request('POST', '/account-login/', data || {}, { skipAuth: true }).then(function (res) {
+    if (res && typeof res === 'object' && 'code' in res) {
+      if (res.code === 0) {
+        var info = res.data || {};
+        if (info.openid) {
+          wx.setStorageSync('openid', info.openid);
+          var app = getApp();
+          if (app && app.globalData) {
+            app.globalData.openid = info.openid;
+          }
+        }
+        return info;
+      }
+      throw { message: res.message || '登录失败', code: res.code };
+    }
+    return res;
+  });
+}
+
+// ============ 用户资料 & 密码管理 ============
+
+/**
+ * 获取个人资料
+ * GET /api/profile/
+ * @returns {Promise} { account, nickname, avatarUrl, email, phone, address, createdAt }
+ */
+function getProfile() {
+  return ensureOpenid().then(function () {
+    return request('GET', '/profile/');
+  }).then(function (res) {
+    if (res && typeof res === 'object' && 'code' in res) {
+      return res.data || {};
+    }
+    return res;
+  });
+}
+
+/**
+ * 更新个人资料
+ * POST /api/profile/update/
+ * @param {Object} data - { nickname?, avatarUrl?, email?, phone?, address? }
+ * @returns {Promise} 更新后的资料
+ */
+function updateProfile(data) {
+  return ensureOpenid().then(function () {
+    return request('POST', '/profile/update/', data || {});
+  }).then(function (res) {
+    if (res && typeof res === 'object' && 'code' in res) {
+      if (res.code === 0) return res.data || {};
+      throw { message: res.message || '保存失败', code: res.code };
+    }
+    return res;
+  });
+}
+
+/**
+ * 修改密码（需登录，验证原密码）
+ * POST /api/change-password/
+ * @param {Object} data - { oldPassword, newPassword }
+ * @returns {Promise}
+ */
+function changePassword(data) {
+  return ensureOpenid().then(function () {
+    return request('POST', '/change-password/', data || {});
+  }).then(function (res) {
+    if (res && typeof res === 'object' && 'code' in res) {
+      if (res.code === 0) return res;
+      throw { message: res.message || '密码修改失败', code: res.code };
+    }
+    return res;
+  });
+}
+
+/**
+ * 忘记密码 - 发送验证码
+ * POST /api/forgot-password/
+ * @param {Object} data - { account, channel: 'email'|'phone' }
+ * @returns {Promise} { devCode?, target? }
+ */
+function forgotPassword(data) {
+  return request('POST', '/forgot-password/', data || {}, { skipAuth: true }).then(function (res) {
+    if (res && typeof res === 'object' && 'code' in res) {
+      if (res.code === 0) return res.data || {};
+      throw { message: res.message || '发送失败', code: res.code };
+    }
+    return res;
+  });
+}
+
+/**
+ * 重置密码（验证码 + 新密码）
+ * POST /api/reset-password/
+ * @param {Object} data - { account, code, newPassword }
+ * @returns {Promise}
+ */
+function resetPassword(data) {
+  return request('POST', '/reset-password/', data || {}, { skipAuth: true }).then(function (res) {
+    if (res && typeof res === 'object' && 'code' in res) {
+      if (res.code === 0) return res;
+      throw { message: res.message || '重置失败', code: res.code };
+    }
+    return res;
+  });
+}
+
+/**
  * 兼容 wx.cloud.database().collection(name) 链式调用
  * 支持：
  *   .get({success, fail}) / .get().then()
@@ -782,6 +911,14 @@ module.exports = {
   request: request,
   database: database,
   callFunction: callFunction,
+  register: register,
+  accountLogin: accountLogin,
+  // 用户资料 & 密码管理
+  getProfile: getProfile,
+  updateProfile: updateProfile,
+  changePassword: changePassword,
+  forgotPassword: forgotPassword,
+  resetPassword: resetPassword,
   aiAssist: aiAssist,
   aiAssistWithRetry: aiAssistWithRetry,
   callCustomAI: callCustomAI,

@@ -41,6 +41,7 @@ export const userApi = {
   update: (openid, data) => http.put(`/users/${openid}/`, data),
   remove: (openid) => http.delete(`/users/${openid}/`),
   profile: (openid) => http.get(`/users/${openid}/profile/`),
+  resetPassword: (openid) => http.post(`/users/${openid}/reset-password/`),
 }
 
 export const adminApi = {

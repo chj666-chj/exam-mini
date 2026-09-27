@@ -1,0 +1,50 @@
+<view class="cp-page">
+  <!-- 强制改密提示 -->
+  <view wx:if="{{forceReset}}" class="cp-force-tip">
+    管理员已重置您的密码，为保障账号安全，请修改密码后继续使用。
+  </view>
+
+  <!-- 全局错误 -->
+  <view wx:if="{{globalError}}" class="cp-global-error">
+    <text>{{globalError}}</text>
+  </view>
+
+  <view class="cp-form">
+    <!-- 原密码 -->
+    <view class="cp-field {{errors.old ? 'cp-field-error' : ''}}">
+      <text class="cp-label">原密码</text>
+      <input class="cp-input" type="{{showOld ? 'text' : 'password'}}" password="{{!showOld}}" placeholder="请输入原密码" value="{{oldPassword}}" bindinput="onOldInput" maxlength="32" />
+      <view class="cp-toggle" catchtap="toggleOld">{{showOld ? '隐藏' : '显示'}}</view>
+    </view>
+    <view wx:if="{{errors.old}}" class="cp-error-msg">{{errors.old}}</view>
+
+    <!-- 新密码 -->
+    <view class="cp-field {{errors.new ? 'cp-field-error' : ''}}">
+      <text class="cp-label">新密码</text>
+      <input class="cp-input" type="{{showNew ? 'text' : 'password'}}" password="{{!showNew}}" placeholder="6-32位，需含字母和数字" value="{{newPassword}}" bindinput="onNewInput" maxlength="32" />
+      <view class="cp-toggle" catchtap="toggleNew">{{showNew ? '隐藏' : '显示'}}</view>
+    </view>
+    <view wx:if="{{errors.new}}" class="cp-error-msg">{{errors.new}}</view>
+
+    <!-- 密码强度 -->
+    <view wx:if="{{newPassword}}" class="cp-strength">
+      <view class="cp-strength-bar">
+        <view class="cp-strength-fill cp-strength-{{strengthLevel}}"></view>
+      </view>
+      <text class="cp-strength-text">强度：{{strengthText}}</text>
+    </view>
+
+    <!-- 确认新密码 -->
+    <view class="cp-field {{errors.confirm ? 'cp-field-error' : ''}}">
+      <text class="cp-label">确认密码</text>
+      <input class="cp-input" type="{{showConfirm ? 'text' : 'password'}}" password="{{!showConfirm}}" placeholder="请再次输入新密码" value="{{confirmPassword}}" bindinput="onConfirmInput" maxlength="32" />
+      <view class="cp-toggle" catchtap="toggleConfirm">{{showConfirm ? '隐藏' : '显示'}}</view>
+    </view>
+    <view wx:if="{{errors.confirm}}" class="cp-error-msg">{{errors.confirm}}</view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <button class="cp-submit-btn" bindtap="handleSubmit" loading="{{saving}}" disabled="{{saving}}">
+    {{saving ? '修改中...' : '确认修改'}}
+  </button>
+</view>

@@ -1,45 +1,165 @@
-<view class="page-info">
-    <view class="header">
-        <view class="avatar"><open-data type="userAvatarUrl"></open-data></view>
-        <view class="nickname"><open-data type="userNickName"></open-data></view>
+<view class="auth-page">
+  <!-- 顶部 Logo 区 -->
+  <view class="auth-header">
+    <image class="auth-logo" src="/images/header.png" mode="aspectFill" />
+    <view class="auth-title">考试助手</view>
+    <view class="auth-subtitle">{{mode === 'login' ? '欢迎回来，请登录' : '创建账号，开始备考之旅'}}</view>
+  </view>
+
+  <!-- Tab 切换 -->
+  <view class="auth-tabs">
+    <view class="auth-tab {{mode === 'login' ? 'auth-tab-active' : ''}}" bindtap="switchToLogin">登录</view>
+    <view class="auth-tab {{mode === 'register' ? 'auth-tab-active' : ''}}" bindtap="switchToRegister">注册</view>
+  </view>
+
+  <!-- 全局错误提示 -->
+  <view wx:if="{{globalError}}" class="auth-global-error">
+    <text class="auth-global-error-icon">!</text>
+    <text class="auth-global-error-text">{{globalError}}</text>
+  </view>
+
+  <!-- ===== 登录表单 ===== -->
+  <view wx:if="{{mode === 'login'}}" class="auth-form">
+    <!-- 用户名 -->
+    <view class="form-field {{loginErrors.username ? 'form-field-error' : ''}}">
+      <view class="field-icon">U</view>
+      <input
+        class="field-input"
+        type="text"
+        placeholder="请输入用户名"
+        placeholder-class="field-placeholder"
+        value="{{loginForm.username}}"
+        bindinput="onLoginUsernameInput"
+        maxlength="20"
+      />
     </view>
-    <view class="menus">
-        <view class="menu" bindtap="bindMyHistory" >
-            <view class="left">
-            <image class="icon" style="background-color: #eeeeee;" mode="aspectFill" src="http://file.xiaomutong.com.cn/20200206/recordicon.png"></image>
-            <text class="title">答题记录</text>
-            </view>
-            <view class="arraw">></view>
-        </view>  
-        <view class="menu" bindtap="bindMyStudy" >
-            <view class="left">
-            <image class="icon" style="background-color: #eeeeee;" mode="aspectFill" src="http://file.xiaomutong.com.cn/20200206/listicon.png"></image>
-            <text class="title">错题记录</text>
-            </view>
-            <view class="arraw">></view>
-        </view>   
-        <view class="menu" bindtap="bindgorule" >
-            <view class="left">
-            <image class="icon" style="background-color: #eeeeee;" mode="aspectFill" src="http://file.xiaomutong.com.cn/20200206/lookicon.png"></image>
-            <text class="title">使用说明</text>
-            </view>
-            <view class="arraw">></view>
-        </view>  
-        <view class="menu" bindtap="bindgopay" >
-            <view class="left">
-            <image class="icon" style="background-color: #eeeeee;" mode="aspectFill" src="http://file.xiaomutong.com.cn/20200206/moneyicon.png"></image>
-            <text class="title">帮助支持</text>
-            </view>
-            <view class="arraw">></view>
-        </view>  
-                  
-        <view class="menu" bindtap="bindgoabout" >
-            <view class="left">
-            <image class="icon" style="background-color: #eeeeee;" mode="aspectFill" src="http://file.xiaomutong.com.cn/20200206/loveicon.png"></image>
-            <text class="title">关于我们</text>
-            </view>
-            <view class="arraw">></view>
-        </view>  
+    <view wx:if="{{loginErrors.username}}" class="field-error-msg">{{loginErrors.username}}</view>
+
+    <!-- 密码 -->
+    <view class="form-field {{loginErrors.password ? 'form-field-error' : ''}}">
+      <view class="field-icon">P</view>
+      <input
+        class="field-input"
+        type="{{showLoginPwd ? 'text' : 'password'}}"
+        password="{{!showLoginPwd}}"
+        placeholder="请输入密码"
+        placeholder-class="field-placeholder"
+        value="{{loginForm.password}}"
+        bindinput="onLoginPasswordInput"
+        maxlength="32"
+      />
+      <view class="field-toggle" catchtap="toggleLoginPwd">{{showLoginPwd ? '隐藏' : '显示'}}</view>
+    </view>
+    <view wx:if="{{loginErrors.password}}" class="field-error-msg">{{loginErrors.password}}</view>
+
+    <!-- 登录按钮 -->
+    <button class="auth-submit-btn" bindtap="handleLogin" loading="{{submitting}}" disabled="{{submitting}}">
+      {{submitting ? '登录中...' : '登 录'}}
+    </button>
+
+    <!-- 忘记密码 -->
+    <view class="auth-forgot-row">
+      <text class="auth-forgot-link" catchtap="goForgotPassword">忘记密码？</text>
     </view>
 
+    <!-- 切换到注册 -->
+    <view class="auth-switch">
+      <text>还没有账号？</text>
+      <text class="auth-switch-link" bindtap="switchToRegister">立即注册</text>
+    </view>
+
+    <!-- 游客登录 -->
+    <view class="auth-divider">
+      <view class="auth-divider-line"></view>
+      <text class="auth-divider-text">或</text>
+      <view class="auth-divider-line"></view>
+    </view>
+    <button class="auth-guest-btn" bindtap="handleGuestLogin" disabled="{{submitting}}">游客体验模式</button>
+  </view>
+
+  <!-- ===== 注册表单 ===== -->
+  <view wx:if="{{mode === 'register'}}" class="auth-form">
+    <!-- 用户名 -->
+    <view class="form-field {{registerErrors.username ? 'form-field-error' : ''}}">
+      <view class="field-icon">U</view>
+      <input
+        class="field-input"
+        type="text"
+        placeholder="设置用户名（3-20位字母/数字/下划线）"
+        placeholder-class="field-placeholder"
+        value="{{registerForm.username}}"
+        bindinput="onRegUsernameInput"
+        maxlength="20"
+      />
+    </view>
+    <view wx:if="{{registerErrors.username}}" class="field-error-msg">{{registerErrors.username}}</view>
+
+    <!-- 昵称 -->
+    <view class="form-field {{registerErrors.nickname ? 'form-field-error' : ''}}">
+      <view class="field-icon">N</view>
+      <input
+        class="field-input"
+        type="text"
+        placeholder="设置昵称（选填，默认用用户名）"
+        placeholder-class="field-placeholder"
+        value="{{registerForm.nickname}}"
+        bindinput="onRegNicknameInput"
+        maxlength="20"
+      />
+    </view>
+    <view wx:if="{{registerErrors.nickname}}" class="field-error-msg">{{registerErrors.nickname}}</view>
+
+    <!-- 密码 -->
+    <view class="form-field {{registerErrors.password ? 'form-field-error' : ''}}">
+      <view class="field-icon">P</view>
+      <input
+        class="field-input"
+        type="{{showRegPwd ? 'text' : 'password'}}"
+        password="{{!showRegPwd}}"
+        placeholder="设置密码（6-32位）"
+        placeholder-class="field-placeholder"
+        value="{{registerForm.password}}"
+        bindinput="onRegPasswordInput"
+        maxlength="32"
+      />
+      <view class="field-toggle" catchtap="toggleRegPwd">{{showRegPwd ? '隐藏' : '显示'}}</view>
+    </view>
+    <view wx:if="{{registerErrors.password}}" class="field-error-msg">{{registerErrors.password}}</view>
+
+    <!-- 确认密码 -->
+    <view class="form-field {{registerErrors.confirmPassword ? 'form-field-error' : ''}}">
+      <view class="field-icon">P</view>
+      <input
+        class="field-input"
+        type="{{showRegConfirmPwd ? 'text' : 'password'}}"
+        password="{{!showRegConfirmPwd}}"
+        placeholder="请再次输入密码"
+        placeholder-class="field-placeholder"
+        value="{{registerForm.confirmPassword}}"
+        bindinput="onRegConfirmPasswordInput"
+        maxlength="32"
+      />
+      <view class="field-toggle" catchtap="toggleRegConfirmPwd">{{showRegConfirmPwd ? '隐藏' : '显示'}}</view>
+    </view>
+    <view wx:if="{{registerErrors.confirmPassword}}" class="field-error-msg">{{registerErrors.confirmPassword}}</view>
+
+    <!-- 注册按钮 -->
+    <button class="auth-submit-btn" bindtap="handleRegister" loading="{{submitting}}" disabled="{{submitting}}">
+      {{submitting ? '注册中...' : '注 册'}}
+    </button>
+
+    <!-- 切换到登录 -->
+    <view class="auth-switch">
+      <text>已有账号？</text>
+      <text class="auth-switch-link" bindtap="switchToLogin">返回登录</text>
+    </view>
+
+    <!-- 游客登录 -->
+    <view class="auth-divider">
+      <view class="auth-divider-line"></view>
+      <text class="auth-divider-text">或</text>
+      <view class="auth-divider-line"></view>
+    </view>
+    <button class="auth-guest-btn" bindtap="handleGuestLogin" disabled="{{submitting}}">游客体验模式</button>
+  </view>
 </view>

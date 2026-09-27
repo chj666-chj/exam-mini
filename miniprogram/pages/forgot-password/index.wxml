@@ -1,0 +1,64 @@
+<view class="fp-page">
+  <view class="fp-header">
+    <view class="fp-title">找回密码</view>
+    <view class="fp-subtitle">{{step === 1 ? '通过绑定的邮箱或手机号验证身份' : '输入验证码并设置新密码'}}</view>
+  </view>
+
+  <view wx:if="{{globalError}}" class="fp-global-error">
+    <text>{{globalError}}</text>
+  </view>
+
+  <!-- ===== Step 1: 输入用户名 + 选择渠道 ===== -->
+  <view wx:if="{{step === 1}}" class="fp-form">
+    <view class="fp-field {{errors.account ? 'fp-field-error' : ''}}">
+      <text class="fp-label">用户名</text>
+      <input class="fp-input" placeholder="请输入注册的用户名" value="{{account}}" bindinput="onAccountInput" maxlength="20" />
+    </view>
+    <view wx:if="{{errors.account}}" class="fp-error-msg">{{errors.account}}</view>
+
+    <view class="fp-channel-label">选择验证方式</view>
+    <view class="fp-channel-group">
+      <view class="fp-channel-btn {{channel === 'email' ? 'fp-channel-active' : ''}}" data-channel="email" bindtap="selectChannel">邮箱验证</view>
+      <view class="fp-channel-btn {{channel === 'phone' ? 'fp-channel-active' : ''}}" data-channel="phone" bindtap="selectChannel">手机号验证</view>
+    </view>
+
+    <button class="fp-submit-btn" bindtap="handleSendCode" loading="{{sending}}" disabled="{{sending}}">
+      {{sending ? '发送中...' : '发送验证码'}}
+    </button>
+  </view>
+
+  <!-- ===== Step 2: 输入验证码 + 新密码 ===== -->
+  <view wx:if="{{step === 2}}" class="fp-form">
+    <!-- 开发环境验证码提示 -->
+    <view wx:if="{{devCode}}" class="fp-dev-code">
+      开发环境验证码：<text class="fp-dev-code-val">{{devCode}}</text>
+    </view>
+    <view wx:if="{{targetHint}}" class="fp-target-hint">
+      验证码已发送至：{{targetHint}}
+    </view>
+
+    <view class="fp-field {{errors.code ? 'fp-field-error' : ''}}">
+      <text class="fp-label">验证码</text>
+      <input class="fp-input" placeholder="请输入 6 位验证码" value="{{code}}" type="number" maxlength="6" bindinput="onCodeInput" />
+    </view>
+    <view wx:if="{{errors.code}}" class="fp-error-msg">{{errors.code}}</view>
+
+    <view class="fp-field {{errors.new ? 'fp-field-error' : ''}}">
+      <text class="fp-label">新密码</text>
+      <input class="fp-input" placeholder="6-32位，需含字母和数字" value="{{newPassword}}" password="{{true}}" bindinput="onNewInput" maxlength="32" />
+    </view>
+    <view wx:if="{{errors.new}}" class="fp-error-msg">{{errors.new}}</view>
+
+    <view class="fp-field {{errors.confirm ? 'fp-field-error' : ''}}">
+      <text class="fp-label">确认密码</text>
+      <input class="fp-input" placeholder="请再次输入新密码" value="{{confirmPassword}}" password="{{true}}" bindinput="onConfirmInput" maxlength="32" />
+    </view>
+    <view wx:if="{{errors.confirm}}" class="fp-error-msg">{{errors.confirm}}</view>
+
+    <button class="fp-submit-btn" bindtap="handleReset" loading="{{resetting}}" disabled="{{resetting}}">
+      {{resetting ? '重置中...' : '重置密码'}}
+    </button>
+
+    <view class="fp-back" bindtap="backToStep1">返回上一步</view>
+  </view>
+</view>
